@@ -8,10 +8,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,7 +31,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: MoodViewModel = viewModel()) {
+fun SettingsScreen(
+    viewModel: MoodViewModel = viewModel(),
+    onNavigateToGuide: () -> Unit
+) {
     val context = LocalContext.current
     val settingsRepo = remember { SettingsRepository(context) }
     val coroutineScope = rememberCoroutineScope()
@@ -71,6 +72,26 @@ fun SettingsScreen(viewModel: MoodViewModel = viewModel()) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
+
+        SectionCard(stringResource(R.string.guide_title), Icons.AutoMirrored.Filled.HelpOutline) {
+            OutlinedCard(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    onNavigateToGuide()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.large
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(stringResource(R.string.guide_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
 
         SectionCard(stringResource(R.string.notifications), Icons.Default.Notifications) {
             Row(verticalAlignment = Alignment.CenterVertically) {

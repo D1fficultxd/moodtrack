@@ -93,14 +93,28 @@
     <string name="pdf_avg_anxiety">Avg Anxiety: %1$.1f / 10</string>
     <string name="pdf_avg_sleep">Avg Sleep: %1$.1f h</string>
     <string name="pdf_avg_mood">Avg Mood: %1$.1f / 10</string>
+    <string name="pdf_avg_apathy">Avg Apathy: %1$.1f / 10</string>
+    <string name="pdf_avg_fatigue">Avg Fatigue: %1$.1f / 10</string>
+    <string name="pdf_avg_hopelessness">Avg Hopelessness: %1$.1f / 10</string>
     <string name="pdf_self_harm_days">Self-harm days: %1$d</string>
-    <string name="pdf_suicidal_days">Suicidal thoughts days: %1$d</string>
+    <string name="pdf_suicidal_days">ST > 0 days: %1$d</string>
 
     <string name="pdf_col_date">Date</string>
     <string name="pdf_col_sleep">Sleep</string>
-    <string name="pdf_col_anxiety">Anx</string>
+    <string name="pdf_col_ease">Easy</string>
     <string name="pdf_col_mood">Mood</string>
+    <string name="pdf_col_anxiety">Anx</string>
+    <string name="pdf_col_irritability">Irr</string>
+    <string name="pdf_col_impulsivity">Imp</string>
+    <string name="pdf_col_racing">Race</string>
+    <string name="pdf_col_apathy">Apa</string>
+    <string name="pdf_col_fatigue">Fat</string>
+    <string name="pdf_col_interest">Int</string>
+    <string name="pdf_col_hopelessness">Hop</string>
     <string name="pdf_col_risks">Risks</string>
+    <string name="pdf_col_note">Note</string>
+
+    <string name="pdf_summary_filled_days">Filled days: %1$d</string>
 
     <string name="mood_label">Mood</string>
     <string name="anxiety_label">Anxiety</string>
@@ -114,4 +128,137 @@
     <string name="loss_of_interest_label">Loss of interest</string>
     <string name="hopelessness_label">Hopelessness</string>
     <string name="suicidal_thoughts_label">Suicidal thoughts</string>
+
+    <string name="guide_title">How to Assess Metrics</string>
+    <string name="guide_scale_title">General Scale 0–10</string>
+    <string name="guide_scale_0">0 — No symptom</string>
+    <string name="guide_scale_1_2">1–2 — Weak, barely interferes</string>
+    <string name="guide_scale_3_4">3–4 — Noticeable, but controlled</string>
+    <string name="guide_scale_5_6">5–6 — Interferes, requires effort</string>
+    <string name="guide_scale_7_8">7–8 — Strongly interferes, affects work/sleep/social</string>
+    <string name="guide_scale_9_10">9–10 — Almost uncontrollable or dangerous</string>
+
+    <string name="guide_mood_title">Mood</string>
+    <string name="guide_mood_0_2">0–2 — Very bad</string>
+    <string name="guide_mood_3_4">3–4 — Low</string>
+    <string name="guide_mood_5">5 — Neutral</string>
+    <string name="guide_mood_6_7">6–7 — Good, but controlled</string>
+    <string name="guide_mood_8">8 — Suspiciously elevated, many ideas</string>
+    <string name="guide_mood_9_10">9–10 — Racing/Euphoria, hard to stop</string>
+    <string name="guide_mood_warning">Warning: Mood 7–10 + low sleep/racing/impulsivity = not just a good day.</string>
+
+    <string name="guide_sleep_title">Sleep</string>
+    <string name="guide_sleep_8_10">8–10 h — Normal/Much</string>
+    <string name="guide_sleep_7_8">7–8 h — Good</string>
+    <string name="guide_sleep_6_7">6–7 h — Tolerable</string>
+    <string name="guide_sleep_5_6">5–6 h — Risk</string>
+    <string name="guide_sleep_lt5">&lt;5 h — Red flag</string>
+    <string name="guide_sleep_lt4_no_fatigue">&lt;4 h without fatigue — Strong racing marker</string>
+
+    <string name="guide_sleep_ease_title">Ease of falling asleep</string>
+    <string name="guide_sleep_ease_0">0 — Fell asleep easily</string>
+    <string name="guide_sleep_ease_1_2">1–2 — Slightly longer than usual</string>
+    <string name="guide_sleep_ease_3_4">3–4 — Tossed and turned, but fell asleep</string>
+    <string name="guide_sleep_ease_5_6">5–6 — Could not fall asleep for a long time</string>
+    <string name="guide_sleep_ease_7_8">7–8 — Very hard to fall asleep</string>
+    <string name="guide_sleep_ease_9_10">9–10 — Almost no sleep/could not fall asleep</string>
+
+    <string name="guide_anxiety_title">Anxiety</string>
+    <string name="guide_anxiety_0">0 — Calm</string>
+    <string name="guide_anxiety_1_2">1–2 — Light tension</string>
+    <string name="guide_anxiety_3_4">3–4 — Noticeable anxiety, but tolerable</string>
+    <string name="guide_anxiety_5_6">5–6 — Interferes with focus</string>
+    <string name="guide_anxiety_7_8">7–8 — Almost constant churning</string>
+    <string name="guide_anxiety_9_10">9–10 — Unbearable, almost panic</string>
+
+    <string name="guide_irritability_title">Irritability</string>
+    <string name="guide_irritability_0">0 — Calm</string>
+    <string name="guide_irritability_1_2">1–2 — Slightly more irritable</string>
+    <string name="guide_irritability_3_4">3–4 — Easily annoyed, but held back</string>
+    <string name="guide_irritability_5_6">5–6 — Sharpness/outbursts</string>
+    <string name="guide_irritability_7_8">7–8 — Conflicts, strong anger</string>
+    <string name="guide_irritability_9_10">9–10 — Almost no control over reactions</string>
+
+    <string name="guide_impulsivity_title">Impulsivity</string>
+    <string name="guide_impulsivity_0">0 — Decisions are calm</string>
+    <string name="guide_impulsivity_1_2">1–2 — Slightly more spontaneity</string>
+    <string name="guide_impulsivity_3_4">3–4 — Want to do something suddenly, but control it</string>
+    <string name="guide_impulsivity_5_6">5–6 — Impulsive actions/plans/spending/conflicts</string>
+    <string name="guide_impulsivity_7_8">7–8 — Hard to stop, risky actions</string>
+    <string name="guide_impulsivity_9_10">9–10 — Dangerous actions, loss of control</string>
+
+    <string name="guide_racing_thoughts_title">Racing Thoughts</string>
+    <string name="guide_racing_thoughts_0">0 — Thoughts are calm</string>
+    <string name="guide_racing_thoughts_1_2">1–2 — Slightly faster than usual</string>
+    <string name="guide_racing_thoughts_3_4">3–4 — Many thoughts, but focus exists</string>
+    <string name="guide_racing_thoughts_5_6">5–6 — Thoughts jump, hard to keep a line</string>
+    <string name="guide_racing_thoughts_7_8">7–8 — Flow of ideas, interferes with work/sleep</string>
+    <string name="guide_racing_thoughts_9_10">9–10 — Almost impossible to stop</string>
+
+    <string name="guide_apathy_title">Apathy</string>
+    <string name="guide_apathy_0">0 — Normal start of activities</string>
+    <string name="guide_apathy_1_2">1–2 — Slightly harder to start</string>
+    <string name="guide_apathy_3_4">3–4 — Procrastination, but can engage</string>
+    <string name="guide_apathy_5_6">5–6 — Hard to start without pressure</string>
+    <string name="guide_apathy_7_8">7–8 — Almost nothing started</string>
+    <string name="guide_apathy_9_10">9–10 — Complete stop of activity</string>
+
+    <string name="guide_fatigue_title">Fatigue</string>
+    <string name="guide_fatigue_0">0 — Energetic</string>
+    <string name="guide_fatigue_1_2">1–2 — Light fatigue</string>
+    <string name="guide_fatigue_3_4">3–4 — Tired, but activities possible</string>
+    <string name="guide_fatigue_5_6">5–6 — Have to drag yourself</string>
+    <string name="guide_fatigue_7_8">7–8 — Activities strongly suffer</string>
+    <string name="guide_fatigue_9_10">9–10 — Almost non-functioning</string>
+
+    <string name="guide_loss_of_interest_title">Loss of Interest</string>
+    <string name="guide_loss_of_interest_0">0 — Interests are alive</string>
+    <string name="guide_loss_of_interest_1_2">1–2 — Interest slightly weaker</string>
+    <string name="guide_loss_of_interest_3_4">3–4 — Less pleasure, but involved</string>
+    <string name="guide_loss_of_interest_5_6">5–6 — Almost nothing catches</string>
+    <string name="guide_loss_of_interest_7_8">7–8 — Even favorite things feel empty</string>
+    <string name="guide_loss_of_interest_9_10">9–10 — Everything is indifferent</string>
+
+    <string name="guide_hopelessness_title">Hopelessness</string>
+    <string name="guide_hopelessness_0">0 — Future is normal</string>
+    <string name="guide_hopelessness_1_2">1–2 — Anxious doubts</string>
+    <string name="guide_hopelessness_3_4">3–4 — Difficult, but I see options</string>
+    <string name="guide_hopelessness_5_6">5–6 — It seems there is little way out</string>
+    <string name="guide_hopelessness_7_8">7–8 — Feeling of a dead end</string>
+    <string name="guide_hopelessness_9_10">9–10 — Dangerous level, help needed</string>
+
+    <string name="guide_suicidal_title">Suicidal Thoughts</string>
+    <string name="guide_suicidal_0">0 — None</string>
+    <string name="guide_suicidal_1">1 — Passive thoughts</string>
+    <string name="guide_suicidal_2">2 — Frequent/Intrusive thoughts</string>
+    <string name="guide_suicidal_3">3 — High risk or intent</string>
+
+    <string name="guide_self_harm_title">Self-harm</string>
+    <string name="guide_self_harm_desc">Mark \"Yes\" if there was self-harm or action with intent to cause harm to yourself on this day. If there was a strong urge but no action, describe it in the note.</string>
+    <string name="guide_self_harm_rule">Rule: If there was self-harm or a strong urge — set at least 7 on related scales.</string>
+
+    <string name="label_none">none</string>
+    <string name="label_weak">weak</string>
+    <string name="label_noticeable">noticeable</string>
+    <string name="label_interferes">interferes</string>
+    <string name="label_strong">strong</string>
+    <string name="label_critical">critical</string>
+
+    <string name="label_mood_very_bad">very bad</string>
+    <string name="label_mood_low">low</string>
+    <string name="label_mood_neutral">neutral</string>
+    <string name="label_mood_good">good</string>
+    <string name="label_mood_elevated">elevated</string>
+    <string name="label_mood_racing">racing</string>
+
+    <string name="label_sleep_normal">normal</string>
+    <string name="label_sleep_good">good</string>
+    <string name="label_sleep_tolerable">tolerable</string>
+    <string name="label_sleep_risk">risk</string>
+    <string name="label_sleep_red_flag">red flag</string>
+    <string name="label_sleep_racing_marker">racing marker</string>
+
+    <string name="section_depressive_expand">Depressive State</string>
+    <string name="section_racing_expand">Racing and Impulsivity</string>
+    <string name="search_hint">Search metrics...</string>
 </resources>

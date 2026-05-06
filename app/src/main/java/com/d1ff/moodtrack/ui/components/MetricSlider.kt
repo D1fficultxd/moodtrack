@@ -3,6 +3,8 @@ package com.d1ff.moodtrack.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,29 +25,49 @@ fun MetricSlider(
     onValueChange: (Float) -> Unit,
     range: ClosedFloatingPointRange<Float>,
     steps: Int = 0,
-    isInteger: Boolean = true
+    isInteger: Boolean = true,
+    label: String? = null,
+    onHelpClick: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     var showDialog by remember { mutableStateOf(false) }
     
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { showDialog = true },
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.clickable { showDialog = true }
+                )
+                if (onHelpClick != null) {
+                    IconButton(
+                        onClick = onHelpClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Outlined.HelpOutline,
+                            contentDescription = "Help",
+                            modifier = Modifier.size(18.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
             Text(
                 text = if (isInteger) value.toInt().toString() else value.toString(),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.clickable { showDialog = true }
             )
         }
         
@@ -66,6 +88,15 @@ fun MetricSlider(
             valueRange = range,
             steps = steps
         )
+
+        if (label != null) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
     }
 
     if (showDialog) {

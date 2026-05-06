@@ -144,7 +144,12 @@ fun CalendarGrid(month: YearMonth, entries: List<DailyEntry>, onDateClick: (Loca
     val firstDayOfMonth = month.atDay(1).dayOfWeek.value // 1 (Mon) to 7 (Sun)
     val daysBefore = firstDayOfMonth - 1
     
-    val weekDays = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс") // TODO: Localize week days if needed
+    val locale = Locale.getDefault()
+    val weekDays = if (locale.language == "ru") {
+        listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+    } else {
+        listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    }
     
     Column {
         Row(modifier = Modifier.fillMaxWidth()) {

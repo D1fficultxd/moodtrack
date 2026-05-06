@@ -1,18 +1,18 @@
 package com.d1ff.moodtrack.ui.screens
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Note
-import androidx.compose.material.icons.filled.Bed
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.SentimentDissatisfied
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,7 +35,9 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun TodayScreen(
     viewModel: MoodViewModel = viewModel(),
-    initialDate: String? = null
+    initialDate: String? = null,
+    onBack: (() -> Unit)? = null,
+    onNavigateToGuide: () -> Unit
 ) {
     val dateToLoad = initialDate ?: LocalDate.now().toString()
     val entries by viewModel.allEntries.collectAsState()
@@ -51,13 +53,12 @@ fun TodayScreen(
 
     // Metrics State
     var sleepHours by remember(entryForDate, dateToLoad) { mutableFloatStateOf(entryForDate?.sleepHours ?: 8f) }
-    var sleepEase by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.sleepEase ?: 5) }
+    var sleepEase by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.sleepEase ?: 0) }
     var anxiety by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.anxiety ?: 0) }
     var irritability by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.irritability ?: 0) }
     var impulsivity by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.impulsivity ?: 0) }
     var racingThoughts by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.racingThoughts ?: 0) }
     
-    // New Depressive Metrics
     var mood by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.mood ?: 5) }
     var apathy by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.apathy ?: 0) }
     var fatigue by remember(entryForDate, dateToLoad) { mutableIntStateOf(entryForDate?.fatigue ?: 0) }
@@ -68,7 +69,40 @@ fun TodayScreen(
     var selfHarm by remember(entryForDate, dateToLoad) { mutableStateOf(entryForDate?.selfHarm ?: false) }
     var note by remember(entryForDate, dateToLoad) { mutableStateOf(entryForDate?.note ?: "") }
 
+    var helpDialogTitle by remember { mutableStateOf("") }
+    var helpDialogContent by remember { mutableStateOf<List<String>>(emptyList()) }
+    var showHelpDialog by remember { mutableStateOf(false) }
+    
+    var depressiveExpanded by rememberSaveable { mutableStateOf(false) }
+    var racingExpanded by rememberSaveable { mutableStateOf(false) }
+
     val isHighRisk = suicidalThoughts == 3 || selfHarm
+
+    if (showHelpDialog) {
+        AlertDialog(
+            onDismissRequest = { showHelpDialog = false },
+            title = { Text(helpDialogTitle) },
+            text = {
+                Column {
+                    helpDialogContent.forEach { line ->
+                        Text(line, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 2.dp))
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showHelpDialog = false }) {
+                    Text(stringResource(R.string.ok))
+                }
+            }
+        )
+    }
+
+    // Helper to update help dialog
+    val updateHelp: (Int, List<Int>) -> Unit = { titleRes, contentResList ->
+        helpDialogTitle = context.getString(titleRes)
+        helpDialogContent = contentResList.map { context.getString(it) }
+        showHelpDialog = true
+    }
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -82,10 +116,29 @@ fun TodayScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
+                navigationIcon = {
+                    if (onBack != null) {
+                        IconButton(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onBack()
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        onNavigateToGuide()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(R.string.guide_title))
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-                )
+                ),
+                windowInsets = WindowInsets.statusBars
             )
         }
     ) { innerPadding ->
@@ -113,41 +166,253 @@ fun TodayScreen(
                 }
             }
 
+            // Main Section
             SectionCard(stringResource(R.string.section_sleep), Icons.Default.Bed) {
                 MetricSlider(
-                    title = stringResource(R.string.section_sleep), 
+                    title = stringResource(R.string.sleep_hours_label), 
                     value = sleepHours, 
                     onValueChange = { sleepHours = it },
                     range = 0f..16f,
                     steps = 31,
-                    isInteger = false
+                    isInteger = false,
+                    label = getSleepLabel(sleepHours),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_sleep_title, listOf(
+                            R.string.guide_sleep_8_10,
+                            R.string.guide_sleep_7_8,
+                            R.string.guide_sleep_6_7,
+                            R.string.guide_sleep_5_6,
+                            R.string.guide_sleep_lt5,
+                            R.string.guide_sleep_lt4_no_fatigue
+                        ))
+                    }
                 )
                 MetricSlider(
-                    title = stringResource(R.string.sleep_ease).substringBefore(":"), 
+                    title = stringResource(R.string.sleep_ease_label), 
                     value = sleepEase.toFloat(), 
                     onValueChange = { sleepEase = it.toInt() },
                     range = 0f..10f,
-                    steps = 9
+                    steps = 9,
+                    label = getEaseLabel(sleepEase),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_sleep_ease_title, listOf(
+                            R.string.guide_sleep_ease_0,
+                            R.string.guide_sleep_ease_1_2,
+                            R.string.guide_sleep_ease_3_4,
+                            R.string.guide_sleep_ease_5_6,
+                            R.string.guide_sleep_ease_7_8,
+                            R.string.guide_sleep_ease_9_10
+                        ))
+                    }
                 )
             }
 
-            SectionCard(stringResource(R.string.section_anxiety), Icons.Default.Psychology) {
-                MetricSlider(title = stringResource(R.string.anxiety_label), value = anxiety.toFloat(), onValueChange = { anxiety = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.irritability).substringBefore(":"), value = irritability.toFloat(), onValueChange = { irritability = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.impulsivity).substringBefore(":"), value = impulsivity.toFloat(), onValueChange = { impulsivity = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.racing_thoughts).substringBefore(":"), value = racingThoughts.toFloat(), onValueChange = { racingThoughts = it.toInt() }, range = 0f..10f, steps = 9)
+            SectionCard(stringResource(R.string.mood_label), Icons.Default.SentimentSatisfied) {
+                MetricSlider(
+                    title = stringResource(R.string.mood_label), 
+                    value = mood.toFloat(), 
+                    onValueChange = { mood = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getMoodLabel(mood),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_mood_title, listOf(
+                            R.string.guide_mood_0_2,
+                            R.string.guide_mood_3_4,
+                            R.string.guide_mood_5,
+                            R.string.guide_mood_6_7,
+                            R.string.guide_mood_8,
+                            R.string.guide_mood_9_10,
+                            R.string.guide_mood_warning
+                        ))
+                    }
+                )
             }
 
-            SectionCard(stringResource(R.string.section_depression), Icons.Default.SentimentDissatisfied) {
-                MetricSlider(title = stringResource(R.string.mood_label), value = mood.toFloat(), onValueChange = { mood = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.apathy_label), value = apathy.toFloat(), onValueChange = { apathy = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.fatigue_label), value = fatigue.toFloat(), onValueChange = { fatigue = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.loss_of_interest).substringBefore(":"), value = lossOfInterest.toFloat(), onValueChange = { lossOfInterest = it.toInt() }, range = 0f..10f, steps = 9)
-                MetricSlider(title = stringResource(R.string.hopelessness).substringBefore(":"), value = hopelessness.toFloat(), onValueChange = { hopelessness = it.toInt() }, range = 0f..10f, steps = 9)
+            SectionCard(stringResource(R.string.anxiety_label), Icons.Default.Psychology) {
+                MetricSlider(
+                    title = stringResource(R.string.anxiety_label), 
+                    value = anxiety.toFloat(), 
+                    onValueChange = { anxiety = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(anxiety),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_anxiety_title, listOf(
+                            R.string.guide_anxiety_0,
+                            R.string.guide_anxiety_1_2,
+                            R.string.guide_anxiety_3_4,
+                            R.string.guide_anxiety_5_6,
+                            R.string.guide_anxiety_7_8,
+                            R.string.guide_anxiety_9_10
+                        ))
+                    }
+                )
+            }
+
+            // Expandable Sections
+            ExpandableSectionCard(
+                title = stringResource(R.string.section_depressive_expand),
+                icon = Icons.Default.SentimentVeryDissatisfied,
+                expanded = depressiveExpanded,
+                onExpandClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    depressiveExpanded = !depressiveExpanded
+                }
+            ) {
+                MetricSlider(
+                    title = stringResource(R.string.apathy_label), 
+                    value = apathy.toFloat(), 
+                    onValueChange = { apathy = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(apathy),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_apathy_title, listOf(
+                            R.string.guide_apathy_0,
+                            R.string.guide_apathy_1_2,
+                            R.string.guide_apathy_3_4,
+                            R.string.guide_apathy_5_6,
+                            R.string.guide_apathy_7_8,
+                            R.string.guide_apathy_9_10
+                        ))
+                    }
+                )
+                MetricSlider(
+                    title = stringResource(R.string.fatigue_label), 
+                    value = fatigue.toFloat(), 
+                    onValueChange = { fatigue = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(fatigue),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_fatigue_title, listOf(
+                            R.string.guide_fatigue_0,
+                            R.string.guide_fatigue_1_2,
+                            R.string.guide_fatigue_3_4,
+                            R.string.guide_fatigue_5_6,
+                            R.string.guide_fatigue_7_8,
+                            R.string.guide_fatigue_9_10
+                        ))
+                    }
+                )
+                MetricSlider(
+                    title = stringResource(R.string.loss_of_interest_label), 
+                    value = lossOfInterest.toFloat(), 
+                    onValueChange = { lossOfInterest = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(lossOfInterest),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_loss_of_interest_title, listOf(
+                            R.string.guide_loss_of_interest_0,
+                            R.string.guide_loss_of_interest_1_2,
+                            R.string.guide_loss_of_interest_3_4,
+                            R.string.guide_loss_of_interest_5_6,
+                            R.string.guide_loss_of_interest_7_8,
+                            R.string.guide_loss_of_interest_9_10
+                        ))
+                    }
+                )
+                MetricSlider(
+                    title = stringResource(R.string.hopelessness_label), 
+                    value = hopelessness.toFloat(), 
+                    onValueChange = { hopelessness = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(hopelessness),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_hopelessness_title, listOf(
+                            R.string.guide_hopelessness_0,
+                            R.string.guide_hopelessness_1_2,
+                            R.string.guide_hopelessness_3_4,
+                            R.string.guide_hopelessness_5_6,
+                            R.string.guide_hopelessness_7_8,
+                            R.string.guide_hopelessness_9_10
+                        ))
+                    }
+                )
+            }
+
+            ExpandableSectionCard(
+                title = stringResource(R.string.section_racing_expand),
+                icon = Icons.Default.Bolt,
+                expanded = racingExpanded,
+                onExpandClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    racingExpanded = !racingExpanded
+                }
+            ) {
+                MetricSlider(
+                    title = stringResource(R.string.irritability_label), 
+                    value = irritability.toFloat(), 
+                    onValueChange = { irritability = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(irritability),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_irritability_title, listOf(
+                            R.string.guide_irritability_0,
+                            R.string.guide_irritability_1_2,
+                            R.string.guide_irritability_3_4,
+                            R.string.guide_irritability_5_6,
+                            R.string.guide_irritability_7_8,
+                            R.string.guide_irritability_9_10
+                        ))
+                    }
+                )
+                MetricSlider(
+                    title = stringResource(R.string.impulsivity_label), 
+                    value = impulsivity.toFloat(), 
+                    onValueChange = { impulsivity = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(impulsivity),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_impulsivity_title, listOf(
+                            R.string.guide_impulsivity_0,
+                            R.string.guide_impulsivity_1_2,
+                            R.string.guide_impulsivity_3_4,
+                            R.string.guide_impulsivity_5_6,
+                            R.string.guide_impulsivity_7_8,
+                            R.string.guide_impulsivity_9_10
+                        ))
+                    }
+                )
+                MetricSlider(
+                    title = stringResource(R.string.racing_thoughts_label), 
+                    value = racingThoughts.toFloat(), 
+                    onValueChange = { racingThoughts = it.toInt() }, 
+                    range = 0f..10f, 
+                    steps = 9,
+                    label = getSymptomLabel(racingThoughts),
+                    onHelpClick = {
+                        updateHelp(R.string.guide_racing_thoughts_title, listOf(
+                            R.string.guide_racing_thoughts_0,
+                            R.string.guide_racing_thoughts_1_2,
+                            R.string.guide_racing_thoughts_3_4,
+                            R.string.guide_racing_thoughts_5_6,
+                            R.string.guide_racing_thoughts_7_8,
+                            R.string.guide_racing_thoughts_9_10
+                        ))
+                    }
+                )
             }
 
             SectionCard(stringResource(R.string.section_risks), Icons.Default.Warning) {
-                Text(stringResource(R.string.suicidal_thoughts), style = MaterialTheme.typography.titleSmall)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.suicidal_thoughts_label), style = MaterialTheme.typography.titleSmall)
+                    IconButton(onClick = {
+                        updateHelp(R.string.guide_suicidal_title, listOf(
+                            R.string.guide_suicidal_0,
+                            R.string.guide_suicidal_1,
+                            R.string.guide_suicidal_2,
+                            R.string.guide_suicidal_3
+                        ))
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                }
                 val suicidalOptions = listOf(
                     stringResource(R.string.suicidal_none),
                     stringResource(R.string.suicidal_passive),
@@ -203,6 +468,14 @@ fun TodayScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = if (selfHarm) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
                         )
+                        IconButton(onClick = {
+                            updateHelp(R.string.guide_self_harm_title, listOf(
+                                R.string.guide_self_harm_desc,
+                                R.string.guide_self_harm_rule
+                            ))
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
                         Switch(
                             checked = selfHarm,
                             onCheckedChange = null // Click handled by parent Surface
@@ -230,7 +503,7 @@ fun TodayScreen(
                     onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         sleepHours = 8f
-                        sleepEase = 5
+                        sleepEase = 0
                         anxiety = 0
                         irritability = 0
                         impulsivity = 0
@@ -294,7 +567,7 @@ fun SectionCard(title: String, icon: ImageVector, content: @Composable ColumnSco
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp).animateContentSize()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Spacer(Modifier.width(8.dp))
@@ -303,5 +576,91 @@ fun SectionCard(title: String, icon: ImageVector, content: @Composable ColumnSco
             Spacer(modifier = Modifier.height(12.dp))
             content()
         }
+    }
+}
+
+@Composable
+fun ExpandableSectionCard(
+    title: String,
+    icon: ImageVector,
+    expanded: Boolean,
+    onExpandClick: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth().clickable { onExpandClick() },
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(16.dp).animateContentSize()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = title, 
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.Bold, 
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+            if (expanded) {
+                Spacer(modifier = Modifier.height(12.dp))
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+fun getSymptomLabel(value: Int): String {
+    return when (value) {
+        0 -> stringResource(R.string.label_none)
+        1, 2 -> stringResource(R.string.label_weak)
+        3, 4 -> stringResource(R.string.label_noticeable)
+        5, 6 -> stringResource(R.string.label_interferes)
+        7, 8 -> stringResource(R.string.label_strong)
+        else -> stringResource(R.string.label_critical)
+    }
+}
+
+@Composable
+fun getMoodLabel(value: Int): String {
+    return when (value) {
+        0, 1, 2 -> stringResource(R.string.label_mood_very_bad)
+        3, 4 -> stringResource(R.string.label_mood_low)
+        5 -> stringResource(R.string.label_mood_neutral)
+        6, 7 -> stringResource(R.string.label_mood_good)
+        8 -> stringResource(R.string.label_mood_elevated)
+        else -> stringResource(R.string.label_mood_racing)
+    }
+}
+
+@Composable
+fun getSleepLabel(hours: Float): String {
+    return when {
+        hours >= 8f && hours <= 10f -> stringResource(R.string.label_sleep_normal)
+        hours > 7f -> stringResource(R.string.label_sleep_good)
+        hours > 6f -> stringResource(R.string.label_sleep_tolerable)
+        hours > 5f -> stringResource(R.string.label_sleep_risk)
+        hours < 4f -> stringResource(R.string.label_sleep_racing_marker)
+        else -> stringResource(R.string.label_sleep_red_flag)
+    }
+}
+
+@Composable
+fun getEaseLabel(value: Int): String {
+    return when (value) {
+        0 -> stringResource(R.string.guide_sleep_ease_0).split(" — ").last().lowercase()
+        1, 2 -> stringResource(R.string.guide_sleep_ease_1_2).split(" — ").last().lowercase()
+        3, 4 -> stringResource(R.string.guide_sleep_ease_3_4).split(" — ").last().lowercase()
+        5, 6 -> stringResource(R.string.guide_sleep_ease_5_6).split(" — ").last().lowercase()
+        7, 8 -> stringResource(R.string.guide_sleep_ease_7_8).split(" — ").last().lowercase()
+        else -> stringResource(R.string.guide_sleep_ease_9_10).split(" — ").last().lowercase()
     }
 }

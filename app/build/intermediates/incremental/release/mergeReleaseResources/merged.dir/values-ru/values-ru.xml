@@ -67,11 +67,124 @@
     <string name="filter_7d">7 дней</string>
     <string name="filter_all">Все</string>
     <string name="generate_pdf">Сгенерировать PDF</string>
+    <string name="guide_anxiety_0">0 — Спокойно</string>
+    <string name="guide_anxiety_1_2">1–2 — Легкое напряжение</string>
+    <string name="guide_anxiety_3_4">3–4 — Заметная тревога, но терпимо</string>
+    <string name="guide_anxiety_5_6">5–6 — Мешает фокусироваться</string>
+    <string name="guide_anxiety_7_8">7–8 — Почти постоянно крутит</string>
+    <string name="guide_anxiety_9_10">9–10 — Невыносимо, почти паника</string>
+    <string name="guide_anxiety_title">Тревога</string>
+    <string name="guide_apathy_0">0 — Нормально начинаю дела</string>
+    <string name="guide_apathy_1_2">1–2 — Чуть сложнее стартовать</string>
+    <string name="guide_apathy_3_4">3–4 — Прокрастинация, но могу включиться</string>
+    <string name="guide_apathy_5_6">5–6 — Трудно начать без давления</string>
+    <string name="guide_apathy_7_8">7–8 — Почти ничего не начинаю</string>
+    <string name="guide_apathy_9_10">9–10 — Полная остановка активности</string>
+    <string name="guide_apathy_title">Апатия</string>
+    <string name="guide_fatigue_0">0 — Бодро</string>
+    <string name="guide_fatigue_1_2">1–2 — Легкая усталость</string>
+    <string name="guide_fatigue_3_4">3–4 — Устал, но дела возможны</string>
+    <string name="guide_fatigue_5_6">5–6 — Приходится себя тащить</string>
+    <string name="guide_fatigue_7_8">7–8 — Дела сильно страдают</string>
+    <string name="guide_fatigue_9_10">9–10 — Почти не функционирую</string>
+    <string name="guide_fatigue_title">Усталость</string>
+    <string name="guide_hopelessness_0">0 — Будущее нормальное</string>
+    <string name="guide_hopelessness_1_2">1–2 — Тревожные сомнения</string>
+    <string name="guide_hopelessness_3_4">3–4 — Сложно, но варианты вижу</string>
+    <string name="guide_hopelessness_5_6">5–6 — Кажется, что выхода мало</string>
+    <string name="guide_hopelessness_7_8">7–8 — Ощущение тупика</string>
+    <string name="guide_hopelessness_9_10">9–10 — Опасный уровень, нужна помощь</string>
+    <string name="guide_hopelessness_title">Безнадежность</string>
+    <string name="guide_impulsivity_0">0 — Решения спокойные</string>
+    <string name="guide_impulsivity_1_2">1–2 — Чуть больше спонтанности</string>
+    <string name="guide_impulsivity_3_4">3–4 — Хочется резко что-то сделать, но контролирую</string>
+    <string name="guide_impulsivity_5_6">5–6 — Импульсивные действия/планы/траты/конфликты</string>
+    <string name="guide_impulsivity_7_8">7–8 — Трудно остановиться, рискованные действия</string>
+    <string name="guide_impulsivity_9_10">9–10 — Опасные действия, потеря контроля</string>
+    <string name="guide_impulsivity_title">Импульсивность</string>
+    <string name="guide_irritability_0">0 — Спокойно</string>
+    <string name="guide_irritability_1_2">1–2 — Чуть раздражительнее</string>
+    <string name="guide_irritability_3_4">3–4 — Легко бесился, но держался</string>
+    <string name="guide_irritability_5_6">5–6 — Резкость/срывы</string>
+    <string name="guide_irritability_7_8">7–8 — Конфликты, сильная злость</string>
+    <string name="guide_irritability_9_10">9–10 — Почти не контролирую реакции</string>
+    <string name="guide_irritability_title">Раздражительность</string>
+    <string name="guide_loss_of_interest_0">0 — Интересы живые</string>
+    <string name="guide_loss_of_interest_1_2">1–2 — Интерес чуть слабее</string>
+    <string name="guide_loss_of_interest_3_4">3–4 — Меньше удовольствия, но вовлекаюсь</string>
+    <string name="guide_loss_of_interest_5_6">5–6 — Почти ничего не цепляет</string>
+    <string name="guide_loss_of_interest_7_8">7–8 — Даже любимое пустое</string>
+    <string name="guide_loss_of_interest_9_10">9–10 — Все безразлично</string>
+    <string name="guide_loss_of_interest_title">Потеря интереса</string>
+    <string name="guide_mood_0_2">0–2 — Очень плохо</string>
+    <string name="guide_mood_3_4">3–4 — Снижено</string>
+    <string name="guide_mood_5">5 — Нейтрально</string>
+    <string name="guide_mood_6_7">6–7 — Хорошее, но контролируемое</string>
+    <string name="guide_mood_8">8 — Подозрительно приподнято, много идей</string>
+    <string name="guide_mood_9_10">9–10 — Разгон/Эйфория, трудно остановиться</string>
+    <string name="guide_mood_title">Настроение</string>
+    <string name="guide_mood_warning">Предупреждение: Настроение 7–10 + мало сна/разгон/импульсивность = не просто хороший день.</string>
+    <string name="guide_racing_thoughts_0">0 — Мысли спокойные</string>
+    <string name="guide_racing_thoughts_1_2">1–2 — Чуть быстрее обычного</string>
+    <string name="guide_racing_thoughts_3_4">3–4 — Много мыслей, но фокус есть</string>
+    <string name="guide_racing_thoughts_5_6">5–6 — Мысли скачут, сложно удерживать линию</string>
+    <string name="guide_racing_thoughts_7_8">7–8 — Поток идей, мешает делам/сну</string>
+    <string name="guide_racing_thoughts_9_10">9–10 — Почти невозможно остановить</string>
+    <string name="guide_racing_thoughts_title">Разгон мыслей</string>
+    <string name="guide_scale_0">0 — Нет симптома</string>
+    <string name="guide_scale_1_2">1–2 — Слабо, почти не мешает</string>
+    <string name="guide_scale_3_4">3–4 — Заметно, но контролируемо</string>
+    <string name="guide_scale_5_6">5–6 — Мешает, требует усилий</string>
+    <string name="guide_scale_7_8">7–8 — Сильно мешает, влияет на дела/сон/общение</string>
+    <string name="guide_scale_9_10">9–10 — Почти неуправляемо или опасно</string>
+    <string name="guide_scale_title">Общая шкала 0–10</string>
+    <string name="guide_self_harm_desc">Отмечай \"Да\", если в этот день было самоповреждение или действие с намерением причинить себе вред. Если был сильный позыв, но действия не было, опиши это в заметке.</string>
+    <string name="guide_self_harm_rule">Правило: Если было самоповреждение или сильный позыв — ставь минимум 7 на связанных шкалах.</string>
+    <string name="guide_self_harm_title">Самоповреждение</string>
+    <string name="guide_sleep_5_6">5–6 ч — Риск</string>
+    <string name="guide_sleep_6_7">6–7 ч — Терпимо</string>
+    <string name="guide_sleep_7_8">7–8 ч — Хорошо</string>
+    <string name="guide_sleep_8_10">8–10 ч — Нормально/Много</string>
+    <string name="guide_sleep_ease_0">0 — Уснул легко</string>
+    <string name="guide_sleep_ease_1_2">1–2 — Немного дольше обычного</string>
+    <string name="guide_sleep_ease_3_4">3–4 — Ворочался, но уснул</string>
+    <string name="guide_sleep_ease_5_6">5–6 — Долго не мог уснуть</string>
+    <string name="guide_sleep_ease_7_8">7–8 — Очень тяжело заснуть</string>
+    <string name="guide_sleep_ease_9_10">9–10 — Почти не спал/не мог уснуть</string>
+    <string name="guide_sleep_ease_title">Легкость засыпания</string>
+    <string name="guide_sleep_lt4_no_fatigue">&lt;4 ч без усталости — Сильный маркер разгона</string>
+    <string name="guide_sleep_lt5">&lt;5 ч — Красный флаг</string>
+    <string name="guide_sleep_title">Сон</string>
+    <string name="guide_suicidal_0">0 — Нет</string>
+    <string name="guide_suicidal_1">1 — Пассивные мысли</string>
+    <string name="guide_suicidal_2">2 — Частые/Навязчивые мысли</string>
+    <string name="guide_suicidal_3">3 — Высокий риск или намерение</string>
+    <string name="guide_suicidal_title">Суицидальные мысли</string>
+    <string name="guide_title">Как оценивать метрики</string>
     <string name="hopelessness">Безнадежность: %1$d</string>
+    <string name="hopelessness_label">Безнадежность</string>
     <string name="impulsivity">Импульсивность: %1$d</string>
     <string msgid="6827826412747255547" name="in_progress">"Выполняется"</string>
     <string msgid="7933458017204019916" name="indeterminate">"Отмечено частично"</string>
     <string name="irritability">Раздражительность: %1$d</string>
+    <string name="label_critical">критично</string>
+    <string name="label_interferes">мешает</string>
+    <string name="label_mood_elevated">приподнято</string>
+    <string name="label_mood_good">хорошее</string>
+    <string name="label_mood_low">снижено</string>
+    <string name="label_mood_neutral">нейтрально</string>
+    <string name="label_mood_racing">разгон</string>
+    <string name="label_mood_very_bad">очень плохо</string>
+    <string name="label_none">нет</string>
+    <string name="label_noticeable">заметно</string>
+    <string name="label_sleep_good">хорошо</string>
+    <string name="label_sleep_normal">нормально</string>
+    <string name="label_sleep_racing_marker">маркер разгона</string>
+    <string name="label_sleep_red_flag">красный флаг</string>
+    <string name="label_sleep_risk">риск</string>
+    <string name="label_sleep_tolerable">терпимо</string>
+    <string name="label_strong">сильно</string>
+    <string name="label_weak">слабо</string>
     <string name="lang_en">English</string>
     <string name="lang_ru">Русский</string>
     <string name="lang_system">Системный</string>
@@ -81,6 +194,7 @@
     <string name="legend_risk">Повышенный риск</string>
     <string name="legend_today">Сегодня</string>
     <string name="loss_of_interest">Потеря интереса: %1$d</string>
+    <string name="loss_of_interest_label">Потеря интереса</string>
     <string msgid="2988463736136100848" name="m3c_bottom_sheet_collapse_description">"Свернуть нижний экран"</string>
     <string msgid="1555567894577437024" name="m3c_bottom_sheet_dismiss_description">"Закрыть нижний экран"</string>
     <string msgid="8403354765404029791" name="m3c_bottom_sheet_drag_handle_description">"Маркер перемещения"</string>
@@ -153,11 +267,23 @@
     <string name="ok">OK</string>
     <string msgid="8655164131929253426" name="on">"Включено"</string>
     <string name="pdf_avg_anxiety">Средняя тревога: %1$.1f / 10</string>
+    <string name="pdf_avg_apathy">Средняя апатия: %1$.1f / 10</string>
+    <string name="pdf_avg_fatigue">Средняя усталость: %1$.1f / 10</string>
+    <string name="pdf_avg_hopelessness">Средняя безнадежность: %1$.1f / 10</string>
     <string name="pdf_avg_mood">Среднее настроение: %1$.1f / 10</string>
     <string name="pdf_avg_sleep">Средний сон: %1$.1f ч</string>
     <string name="pdf_col_anxiety">Трев</string>
+    <string name="pdf_col_apathy">Апат</string>
     <string name="pdf_col_date">Дата</string>
+    <string name="pdf_col_ease">Засп</string>
+    <string name="pdf_col_fatigue">Уст</string>
+    <string name="pdf_col_hopelessness">Безн</string>
+    <string name="pdf_col_impulsivity">Имп</string>
+    <string name="pdf_col_interest">Инт</string>
+    <string name="pdf_col_irritability">Раздр</string>
     <string name="pdf_col_mood">Настр</string>
+    <string name="pdf_col_note">Заметка</string>
+    <string name="pdf_col_racing">Разг</string>
     <string name="pdf_col_risks">Риски</string>
     <string name="pdf_col_sleep">Сон</string>
     <string name="pdf_created_at">Создан: %1$s</string>
@@ -167,16 +293,20 @@
     <string name="pdf_self_harm_days">Дней с самоповреждением: %1$d</string>
     <string name="pdf_suicidal_days">Дней с суиц. мыслями: %1$d</string>
     <string name="pdf_summary">Сводка за период:</string>
+    <string name="pdf_summary_filled_days">Заполнено дней: %1$d</string>
     <string name="racing_thoughts">Разгон мыслей: %1$d</string>
     <string msgid="5941395253238309765" name="range_end">"Конец диапазона"</string>
     <string msgid="7097486360902471446" name="range_start">"Начало диапазона"</string>
     <string name="reminder_time">Время напоминания</string>
     <string name="risk_warning">Если есть риск причинить себе вред прямо сейчас, обратись за срочной помощью: позвони в экстренную службу или близкому человеку. Приложение не заменяет врача.</string>
     <string name="save">Сохранить</string>
+    <string name="search_hint">Поиск метрик...</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Поиск"</string>
     <string name="section_anxiety">Тревога и возбуждение</string>
     <string name="section_depression">Депрессивное состояние</string>
+    <string name="section_depressive_expand">Депрессивное состояние</string>
     <string name="section_note">Заметка</string>
+    <string name="section_racing_expand">Разгон и импульсивность</string>
     <string name="section_risks">Риски и безопасность</string>
     <string name="section_sleep">Сон</string>
     <string msgid="6043586758067023" name="selected">"Выбрано"</string>
@@ -190,6 +320,7 @@
     <string name="suicidal_none">Нет</string>
     <string name="suicidal_passive">Пассивные мысли</string>
     <string name="suicidal_thoughts">Суицидальные мысли:</string>
+    <string name="suicidal_thoughts_label">Суицидальные мысли</string>
     <string msgid="2561197295334830845" name="switch_role">"Переключатель"</string>
     <string msgid="1672349317127674378" name="tab">"Вкладка"</string>
     <string name="tab_calendar">Календарь</string>
