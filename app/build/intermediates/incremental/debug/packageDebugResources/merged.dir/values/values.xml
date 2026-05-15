@@ -21,6 +21,8 @@
     <string name="entry_saved">Entry saved</string>
     <string name="error_invalid_range">Value must be between %1$.1f and %2$.1f</string>
     <string name="export_description">The app will generate a detailed PDF report with statistics and all entries for the selected period.</string>
+    <string name="export_doctor_subtitle">PDF with summary, tables, and rating guide</string>
+    <string name="export_doctor_title">Doctor report</string>
     <string name="export_from">From</string>
     <string name="export_include_rating_guide">Include rating guide in report</string>
     <string name="export_period">Select period</string>
@@ -169,8 +171,9 @@
     <string name="lang_system">System</string>
     <string name="language">Language</string>
     <string name="legend">Legend</string>
-    <string name="legend_entry">Entry exists</string>
-    <string name="legend_risk">High risk</string>
+    <string name="legend_entry">Has entry</string>
+    <string name="legend_note">Has note</string>
+    <string name="legend_risk">Elevated risk</string>
     <string name="legend_today">Today</string>
     <string name="loss_of_interest">Loss of interest: %1$d</string>
     <string name="loss_of_interest_label">Loss of interest</string>

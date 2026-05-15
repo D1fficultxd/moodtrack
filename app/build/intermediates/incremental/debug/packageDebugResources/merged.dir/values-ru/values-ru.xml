@@ -18,6 +18,8 @@
     <string name="entry_saved">Запись сохранена</string>
     <string name="error_invalid_range">Значение должно быть от %1$.1f до %2$.1f</string>
     <string name="export_description">Приложение сгенерирует подробный PDF-отчет со статистикой и всеми записями за выбранный период.</string>
+    <string name="export_doctor_subtitle">PDF со сводкой, таблицами и методикой оценки</string>
+    <string name="export_doctor_title">Экспорт для врача</string>
     <string name="export_from">С</string>
     <string name="export_include_rating_guide">Добавить методику оценки в отчет</string>
     <string name="export_period">Выберите период</string>
@@ -167,6 +169,7 @@
     <string name="language">Язык</string>
     <string name="legend">Легенда</string>
     <string name="legend_entry">Есть запись</string>
+    <string name="legend_note">Есть заметка</string>
     <string name="legend_risk">Повышенный риск</string>
     <string name="legend_today">Сегодня</string>
     <string name="loss_of_interest">Потеря интереса: %1$d</string>

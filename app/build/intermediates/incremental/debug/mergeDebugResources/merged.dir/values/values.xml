@@ -187,7 +187,7 @@
     <dimen name="notification_main_column_padding_top">10dp</dimen>
     <dimen name="notification_media_narrow_margin">@dimen/notification_content_margin_start</dimen>
     <dimen name="notification_right_icon_size">16dp</dimen>
-    <dimen name="notification_right_side_padding_top">2dp</dimen>
+    <dimen name="notification_right_side_padding_top">4dp</dimen>
     <dimen name="notification_small_icon_background_padding">3dp</dimen>
     <dimen name="notification_small_icon_size_as_large">24dp</dimen>
     <dimen name="notification_subtext_size">13sp</dimen>
@@ -244,6 +244,7 @@
     <item name="compose_view_saveable_id_tag" type="id"/>
     <item name="consume_window_insets_tag" type="id"/>
     <item name="fragment_container_view_tag" type="id"/>
+    <item name="hide_graphics_layer_in_inspector_tag" type="id"/>
     <item name="hide_in_inspector_tag" type="id"/>
     <item name="home" type="id"/>
     <item name="inspection_slot_table_set" type="id"/>
@@ -284,6 +285,7 @@
     <integer name="abc_config_activityShortDur">150</integer>
     <integer name="cancel_button_image_alpha">127</integer>
     <integer name="config_tooltipAnimTime">150</integer>
+    <integer name="m3c_window_layout_in_display_cutout_mode">1</integer>
     <integer name="status_bar_notification_info_maxnum">999</integer>
     <string name="abc_action_bar_home_description">Navigate home</string>
     <string name="abc_action_bar_up_description">Navigate up</string>
@@ -343,6 +345,8 @@
     <string name="entry_saved">Entry saved</string>
     <string name="error_invalid_range">Value must be between %1$.1f and %2$.1f</string>
     <string name="export_description">The app will generate a detailed PDF report with statistics and all entries for the selected period.</string>
+    <string name="export_doctor_subtitle">PDF with summary, tables, and rating guide</string>
+    <string name="export_doctor_title">Doctor report</string>
     <string name="export_from">From</string>
     <string name="export_include_rating_guide">Include rating guide in report</string>
     <string name="export_period">Select period</string>
@@ -493,8 +497,9 @@
     <string name="lang_system">System</string>
     <string name="language">Language</string>
     <string name="legend">Legend</string>
-    <string name="legend_entry">Entry exists</string>
-    <string name="legend_risk">High risk</string>
+    <string name="legend_entry">Has entry</string>
+    <string name="legend_note">Has note</string>
+    <string name="legend_risk">Elevated risk</string>
     <string name="legend_today">Today</string>
     <string name="loss_of_interest">Loss of interest: %1$d</string>
     <string name="loss_of_interest_label">Loss of interest</string>
@@ -541,6 +546,7 @@
     <string name="m3c_dialog">"Dialog"</string>
     <string name="m3c_dropdown_menu_collapsed">Collapsed</string>
     <string name="m3c_dropdown_menu_expanded">Expanded</string>
+    <string name="m3c_dropdown_menu_toggle">Toggle dropdown menu</string>
     <string name="m3c_search_bar_search">Search</string>
     <string name="m3c_snackbar_dismiss">Dismiss</string>
     <string name="m3c_suggestions_available">Suggestions below</string>
@@ -570,9 +576,7 @@
     <string name="not_selected">Not selected</string>
     <string name="note_hint">Daily note</string>
     <string name="notifications">Notifications</string>
-    <string name="off">Off</string>
     <string name="ok">OK</string>
-    <string name="on">On</string>
     <string name="pdf_additional_metrics_title">Additional indicators</string>
     <string name="pdf_avg_anxiety">Avg Anxiety: %1$.1f / 10</string>
     <string name="pdf_avg_apathy">Avg Apathy: %1$.1f / 10</string>
@@ -766,6 +770,9 @@
     <string name="sleep_ease_label">Ease of falling asleep</string>
     <string name="sleep_hours">Hours: %1$.1f</string>
     <string name="sleep_hours_label">Sleep Hours</string>
+    <string name="state_empty">Empty</string>
+    <string name="state_off">Off</string>
+    <string name="state_on">On</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="status_save_error">Save error</string>
     <string name="status_saved">Saved</string>
@@ -1881,6 +1888,19 @@
     </style>
     <style name="DialogWindowTheme">
         <item name="android:windowClipToOutline">false</item>
+    </style>
+    <style name="EdgeToEdgeFloatingDialogTheme" parent="android:Theme.DeviceDefault.Dialog">
+        <item name="android:windowLayoutInDisplayCutoutMode" ns2:targetApi="27">@integer/m3c_window_layout_in_display_cutout_mode</item>
+        <item name="android:windowClipToOutline">false</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowElevation">0dp</item>
+    </style>
+    <style name="EdgeToEdgeFloatingDialogWindowTheme">
+        <item name="android:dialogTheme">@style/EdgeToEdgeFloatingDialogTheme</item>
     </style>
     <style name="FloatingDialogTheme">
         <item name="android:windowIsFloating">false</item>

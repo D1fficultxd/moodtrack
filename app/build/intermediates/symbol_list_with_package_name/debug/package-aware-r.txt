@@ -761,6 +761,7 @@ id expanded_menu
 id forever
 id fragment_container_view_tag
 id group_divider
+id hide_graphics_layer_in_inspector_tag
 id hide_ime_id
 id hide_in_inspector_tag
 id home
@@ -864,6 +865,7 @@ integer abc_config_activityDefaultDur
 integer abc_config_activityShortDur
 integer cancel_button_image_alpha
 integer config_tooltipAnimTime
+integer m3c_window_layout_in_display_cutout_mode
 integer status_bar_notification_info_maxnum
 interpolator btn_checkbox_checked_mtrl_animation_interpolator_0
 interpolator btn_checkbox_checked_mtrl_animation_interpolator_1
@@ -973,6 +975,8 @@ string dropdown_menu
 string entry_saved
 string error_invalid_range
 string export_description
+string export_doctor_subtitle
+string export_doctor_title
 string export_from
 string export_include_rating_guide
 string export_period
@@ -1124,6 +1128,7 @@ string lang_system
 string language
 string legend
 string legend_entry
+string legend_note
 string legend_risk
 string legend_today
 string loss_of_interest
@@ -1167,6 +1172,7 @@ string m3c_date_range_picker_title
 string m3c_dialog
 string m3c_dropdown_menu_collapsed
 string m3c_dropdown_menu_expanded
+string m3c_dropdown_menu_toggle
 string m3c_search_bar_search
 string m3c_snackbar_dismiss
 string m3c_suggestions_available
@@ -1196,9 +1202,7 @@ string no_entries_period
 string not_selected
 string note_hint
 string notifications
-string off
 string ok
-string on
 string pdf_additional_metrics_title
 string pdf_avg_anxiety
 string pdf_avg_apathy
@@ -1392,6 +1396,9 @@ string sleep_ease
 string sleep_ease_label
 string sleep_hours
 string sleep_hours_label
+string state_empty
+string state_off
+string state_on
 string status_bar_notification_info_overflow
 string status_save_error
 string status_saved
@@ -1579,6 +1586,8 @@ style Base_Widget_AppCompat_TextView_SpinnerItem
 style Base_Widget_AppCompat_Toolbar
 style Base_Widget_AppCompat_Toolbar_Button_Navigation
 style DialogWindowTheme
+style EdgeToEdgeFloatingDialogTheme
+style EdgeToEdgeFloatingDialogWindowTheme
 style FloatingDialogTheme
 style FloatingDialogWindowTheme
 style Platform_AppCompat

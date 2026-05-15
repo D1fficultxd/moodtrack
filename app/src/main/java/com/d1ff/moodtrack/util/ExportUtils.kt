@@ -55,6 +55,19 @@ object ExportUtils {
         }
     }
 
+    suspend fun generateDoctorPdf(
+        context: Context,
+        entries: List<DailyEntry>,
+        start: LocalDate,
+        end: LocalDate
+    ): File? = withContext(Dispatchers.IO) {
+        createPdf(context, "moodtrack_doctor_report_${fileTimestamp()}.pdf") { writer ->
+            drawReport(writer, entries.sortedBy { it.parsedDate() }, start, end)
+            writer.startNewPage()
+            drawRatingGuide(writer)
+        }
+    }
+
     private fun createPdf(
         context: Context,
         fileName: String,
@@ -235,12 +248,11 @@ object ExportUtils {
 
     private fun mainMetricColumns(context: Context, locale: Locale): List<TableColumn> = listOf(
         TableColumn(context.getString(R.string.pdf_col_date_full), 78f) { it.formattedDate(locale) },
-        TableColumn(context.getString(R.string.pdf_col_sleep_hours_full), 75f) { formatNumber(it.sleepHours.toDouble(), locale) },
-        TableColumn(context.getString(R.string.pdf_col_sleep_ease_full), 95f) { it.sleepEase.toString() },
-        TableColumn(context.getString(R.string.pdf_col_mood_full), 95f) { it.mood.toString() },
-        TableColumn(context.getString(R.string.pdf_col_anxiety_full), 80f) { it.anxiety.toString() },
-        TableColumn(context.getString(R.string.pdf_col_suicidal_full), 170f) { suicidalValue(context, it.suicidalThoughts) },
-        TableColumn(context.getString(R.string.pdf_col_self_harm_full), 177f) { yesNo(context, it.selfHarm) }
+        TableColumn(context.getString(R.string.pdf_col_sleep_hours_full), 80f) { formatNumber(it.sleepHours.toDouble(), locale) },
+        TableColumn(context.getString(R.string.pdf_col_mood_full), 85f) { it.mood.toString() },
+        TableColumn(context.getString(R.string.pdf_col_anxiety_full), 85f) { it.anxiety.toString() },
+        TableColumn(context.getString(R.string.pdf_col_suicidal_full), 240f) { suicidalValue(context, it.suicidalThoughts) },
+        TableColumn(context.getString(R.string.pdf_col_self_harm_full), 202f) { yesNo(context, it.selfHarm) }
     )
 
     private fun additionalMetricColumns(context: Context): List<TableColumn> = listOf(
@@ -310,17 +322,6 @@ object ExportUtils {
                 context.getString(R.string.pdf_guide_sleep_5_6),
                 context.getString(R.string.pdf_guide_sleep_lt5),
                 context.getString(R.string.pdf_guide_sleep_lt4_no_fatigue)
-            )
-        ),
-        GuideSection(
-            context.getString(R.string.pdf_guide_sleep_ease_title),
-            listOf(
-                context.getString(R.string.pdf_guide_sleep_ease_0),
-                context.getString(R.string.pdf_guide_sleep_ease_1_2),
-                context.getString(R.string.pdf_guide_sleep_ease_3_4),
-                context.getString(R.string.pdf_guide_sleep_ease_5_6),
-                context.getString(R.string.pdf_guide_sleep_ease_7_8),
-                context.getString(R.string.pdf_guide_sleep_ease_9_10)
             )
         ),
         GuideSection(

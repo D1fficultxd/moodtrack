@@ -57,6 +57,8 @@
     <string name="entry_saved">Запись сохранена</string>
     <string name="error_invalid_range">Значение должно быть от %1$.1f до %2$.1f</string>
     <string name="export_description">Приложение сгенерирует подробный PDF-отчет со статистикой и всеми записями за выбранный период.</string>
+    <string name="export_doctor_subtitle">PDF со сводкой, таблицами и методикой оценки</string>
+    <string name="export_doctor_title">Экспорт для врача</string>
     <string name="export_from">С</string>
     <string name="export_include_rating_guide">Добавить методику оценки в отчет</string>
     <string name="export_period">Выберите период</string>
@@ -208,6 +210,7 @@
     <string name="language">Язык</string>
     <string name="legend">Легенда</string>
     <string name="legend_entry">Есть запись</string>
+    <string name="legend_note">Есть заметка</string>
     <string name="legend_risk">Повышенный риск</string>
     <string name="legend_today">Сегодня</string>
     <string name="loss_of_interest">Потеря интереса: %1$d</string>
@@ -251,6 +254,7 @@
     <string msgid="7617233117134790350" name="m3c_dialog">"Диалоговое окно"</string>
     <string msgid="3177828188723359358" name="m3c_dropdown_menu_collapsed">"Свернуто"</string>
     <string msgid="2360841780724299882" name="m3c_dropdown_menu_expanded">"Развернуто"</string>
+    <string msgid="8687821690726149911" name="m3c_dropdown_menu_toggle">"Показать или скрыть раскрывающееся меню"</string>
     <string msgid="6152806324422087846" name="m3c_search_bar_search">"Строка поиска"</string>
     <string msgid="6152755701819882931" name="m3c_snackbar_dismiss">"Закрыть"</string>
     <string msgid="7655536806087401899" name="m3c_suggestions_available">"Подсказки показаны ниже"</string>
@@ -280,9 +284,7 @@
     <string msgid="6610465462668679431" name="not_selected">"Не выбрано"</string>
     <string name="note_hint">Заметка дня</string>
     <string name="notifications">Уведомления</string>
-    <string msgid="875452955155264703" name="off">"Отключено"</string>
     <string name="ok">OK</string>
-    <string msgid="8655164131929253426" name="on">"Включено"</string>
     <string name="pdf_additional_metrics_title">Дополнительные показатели</string>
     <string name="pdf_avg_anxiety">Средняя тревога: %1$.1f / 10</string>
     <string name="pdf_avg_apathy">Средняя апатия: %1$.1f / 10</string>
@@ -476,6 +478,9 @@
     <string name="sleep_ease_label">Легкость засыпания</string>
     <string name="sleep_hours">Часов: %1$.1f</string>
     <string name="sleep_hours_label">Часы сна</string>
+    <string msgid="4139871816613051306" name="state_empty">"Пусто"</string>
+    <string msgid="5834637030682409883" name="state_off">"Отключено"</string>
+    <string msgid="1490883874751719580" name="state_on">"Включено"</string>
     <string msgid="6277540029070332960" name="status_bar_notification_info_overflow">">999"</string>
     <string name="status_save_error">Ошибка сохранения</string>
     <string name="status_saved">Сохранено</string>

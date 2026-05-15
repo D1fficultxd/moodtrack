@@ -180,6 +180,7 @@
     <string name="legend_today">Сегодня</string>
     <string name="legend_entry">Есть запись</string>
     <string name="legend_risk">Повышенный риск</string>
+    <string name="legend_note">Есть заметка</string>
 
     <string name="charts_title">Графики</string>
     <string name="filter_7d">7 дней</string>
@@ -197,6 +198,8 @@
     <string name="generate_pdf">Сгенерировать PDF</string>
     <string name="export_include_rating_guide">Добавить методику оценки в отчет</string>
     <string name="export_rating_guide">Экспортировать методику оценки</string>
+    <string name="export_doctor_title">Экспорт для врача</string>
+    <string name="export_doctor_subtitle">PDF со сводкой, таблицами и методикой оценки</string>
     <string name="no_data_export">Пока нет сохраненных записей. Отчет будет пустым.</string>
     <string name="no_entries_period">В выбранном периоде нет записей</string>
 

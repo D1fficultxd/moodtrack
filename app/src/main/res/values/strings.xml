@@ -45,8 +45,9 @@
     <string name="calendar_title">Calendar</string>
     <string name="legend">Legend</string>
     <string name="legend_today">Today</string>
-    <string name="legend_entry">Entry exists</string>
-    <string name="legend_risk">High risk</string>
+    <string name="legend_entry">Has entry</string>
+    <string name="legend_risk">Elevated risk</string>
+    <string name="legend_note">Has note</string>
 
     <string name="charts_title">Charts</string>
     <string name="filter_7d">7 days</string>
@@ -64,6 +65,8 @@
     <string name="generate_pdf">Generate PDF</string>
     <string name="export_include_rating_guide">Include rating guide in report</string>
     <string name="export_rating_guide">Export rating guide</string>
+    <string name="export_doctor_title">Doctor report</string>
+    <string name="export_doctor_subtitle">PDF with summary, tables, and rating guide</string>
     <string name="no_data_export">No saved entries yet. The report will be empty.</string>
     <string name="no_entries_period">No entries in the selected period</string>
 

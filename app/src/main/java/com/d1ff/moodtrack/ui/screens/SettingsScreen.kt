@@ -420,6 +420,17 @@ fun SettingsScreen(
         
         AlertDialog(
             onDismissRequest = { showTimePicker = false },
+            shape = RoundedCornerShape(30.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurface,
+            title = {
+                Text(
+                    text = stringResource(R.string.reminder_time),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)

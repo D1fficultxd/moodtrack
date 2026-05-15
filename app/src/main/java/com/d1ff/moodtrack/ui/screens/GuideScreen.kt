@@ -3,7 +3,6 @@ package com.d1ff.moodtrack.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -22,10 +21,6 @@ import com.d1ff.moodtrack.ui.components.GlassCard
 fun GuideScreen(onBack: () -> Unit) {
     var searchQuery by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
-
-    BackHandler {
-        onBack()
-    }
 
     Scaffold(
         containerColor = Color.Transparent,

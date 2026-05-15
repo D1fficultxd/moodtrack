@@ -2,9 +2,7 @@ package com.d1ff.moodtrack.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -95,10 +94,6 @@ fun TodayScreen(
 
     val isHighRisk = suicidalThoughts == 3 || selfHarm
 
-    BackHandler(enabled = onBack != null) {
-        onBack?.invoke()
-    }
-
     // Debounced Autosave Logic
     LaunchedEffect(
         sleepHours, sleepEase, anxiety, irritability, impulsivity, racingThoughts,
@@ -158,22 +153,48 @@ fun TodayScreen(
     }
 
     if (showHelpDialog) {
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = { showHelpDialog = false },
-            title = { Text(helpDialogTitle) },
-            text = {
-                Column {
+            shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            dragHandle = {
+                BottomSheetDefaults.DragHandle(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.36f)
+                )
+            }
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = helpDialogTitle,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     helpDialogContent.forEach { line ->
-                        Text(line, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(vertical = 2.dp))
+                        Text(
+                            text = line,
+                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 23.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(onClick = { showHelpDialog = false }) {
+                TextButton(
+                    onClick = { showHelpDialog = false },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
                     Text(stringResource(R.string.ok))
                 }
             }
-        )
+        }
     }
 
     // Helper to update help dialog
@@ -275,13 +296,14 @@ fun TodayScreen(
                             onNavigateToGuide()
                         },
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            containerColor = Color.Transparent,
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.HelpOutline,
-                            contentDescription = stringResource(R.string.guide_title)
+                            contentDescription = stringResource(R.string.guide_title),
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -582,10 +604,22 @@ fun TodayScreen(
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text(stringResource(R.string.note_hint)) },
+                    placeholder = { Text(stringResource(R.string.note_hint)) },
                     modifier = Modifier.fillMaxWidth(),
-                    minLines = 3,
-                    shape = MaterialTheme.shapes.large
+                    minLines = 4,
+                    shape = RoundedCornerShape(24.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.76f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.56f),
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 )
             }
 
@@ -608,8 +642,8 @@ private fun SuicidalOptionRow(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 3.dp),
-        shape = RoundedCornerShape(18.dp),
+            .padding(vertical = 5.dp),
+        shape = RoundedCornerShape(22.dp),
         color = if (selected) {
             MaterialTheme.colorScheme.secondaryContainer
         } else {
@@ -631,7 +665,10 @@ private fun SuicidalOptionRow(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 60.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             RadioButton(
                 selected = selected,
@@ -643,7 +680,7 @@ private fun SuicidalOptionRow(
             )
             Text(
                 text = text,
-                modifier = Modifier.padding(start = 8.dp),
+                modifier = Modifier.padding(start = 10.dp),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
             )
@@ -660,7 +697,7 @@ private fun SelfHarmRow(
     Surface(
         onClick = onToggle,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(22.dp),
         color = if (checked) {
             MaterialTheme.colorScheme.errorContainer
         } else {
@@ -682,7 +719,11 @@ private fun SelfHarmRow(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             MetricLabelWithHelp(
                 title = stringResource(R.string.self_harm),
@@ -754,18 +795,25 @@ fun ExpandableSectionCard(
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
+            Surface(
+                onClick = onExpandClick,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onExpandClick() },
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                color = Color.Transparent,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) {
-                ExpressiveSectionHeader(title = title, icon = icon, modifier = Modifier.weight(1f))
-                Icon(
-                    if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    modifier = Modifier.padding(horizontal = 2.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ExpressiveSectionHeader(title = title, icon = icon, modifier = Modifier.weight(1f))
+                    Icon(
+                        if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             AnimatedVisibility(visible = expanded) {
                 Column {

@@ -261,21 +261,33 @@ fun DayCell(
                     fontWeight = if (isToday || entry != null) FontWeight.Bold else FontWeight.Normal,
                     color = contentColor
                 )
-                if (entry != null) {
+                if (entry != null && !isFuture) {
+                    val hasElevatedRisk = entry.selfHarm || entry.suicidalThoughts > 0
+                    val hasNote = entry.note.isNotBlank()
+
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                        val riskColor = if (entry.anxiety > 5 || entry.mood < 4) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-                        val urgentColor = if (entry.selfHarm || entry.suicidalThoughts > 0) MaterialTheme.colorScheme.error else riskColor
-                        Box(
-                            modifier = Modifier
-                                .size(4.dp)
-                                .clip(CircleShape)
-                                .background(urgentColor)
-                        )
+                        CalendarMarker(MaterialTheme.colorScheme.secondary)
+                        if (hasNote) {
+                            CalendarMarker(MaterialTheme.colorScheme.tertiary)
+                        }
+                        if (hasElevatedRisk) {
+                            CalendarMarker(MaterialTheme.colorScheme.error)
+                        }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun CalendarMarker(color: Color) {
+    Box(
+        modifier = Modifier
+            .size(4.dp)
+            .clip(CircleShape)
+            .background(color)
+    )
 }
 
 @Composable
@@ -293,17 +305,24 @@ fun Legend() {
         ) {
             LegendChip(
                 text = stringResource(R.string.legend_today),
-                dotColor = MaterialTheme.colorScheme.primaryContainer
+                dotColor = MaterialTheme.colorScheme.primary
             )
             LegendChip(
                 text = stringResource(R.string.legend_entry),
-                dotColor = MaterialTheme.colorScheme.secondaryContainer
+                dotColor = MaterialTheme.colorScheme.secondary
             )
         }
-        Row {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             LegendChip(
                 text = stringResource(R.string.legend_risk),
                 dotColor = MaterialTheme.colorScheme.error
+            )
+            LegendChip(
+                text = stringResource(R.string.legend_note),
+                dotColor = MaterialTheme.colorScheme.tertiary
             )
         }
     }

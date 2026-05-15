@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
@@ -62,11 +63,18 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     var isReportExporting by remember { mutableStateOf(false) }
+    var isDoctorExporting by remember { mutableStateOf(false) }
     var isGuideExporting by remember { mutableStateOf(false) }
     var includeRatingGuide by remember { mutableStateOf(false) }
 
     var startDate by remember { mutableStateOf(LocalDate.now().minusDays(30)) }
     var endDate by remember { mutableStateOf(LocalDate.now()) }
+    val entriesForPeriod = remember(allEntries, startDate, endDate) {
+        allEntries.filter {
+            val d = runCatching { LocalDate.parse(it.date) }.getOrNull()
+            d != null && (d.isEqual(startDate) || d.isAfter(startDate)) && (d.isEqual(endDate) || d.isBefore(endDate))
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
@@ -169,21 +177,17 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
 
                     Button(
                         onClick = {
-                            val filtered = allEntries.filter {
-                                val d = runCatching { LocalDate.parse(it.date) }.getOrNull()
-                                d != null && (d.isEqual(startDate) || d.isAfter(startDate)) && (d.isEqual(endDate) || d.isBefore(endDate))
-                            }
                             isReportExporting = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             coroutineScope.launch {
-                                val file = ExportUtils.generatePdf(context, filtered, startDate, endDate, includeRatingGuide)
+                                val file = ExportUtils.generatePdf(context, entriesForPeriod, startDate, endDate, includeRatingGuide)
                                 isReportExporting = false
                                 if (file != null) {
                                     ExportUtils.sharePdf(context, file)
                                 }
                             }
                         },
-                        enabled = !isReportExporting && !isGuideExporting,
+                        enabled = !isReportExporting && !isDoctorExporting && !isGuideExporting,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -205,6 +209,50 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
 
                     FilledTonalButton(
                         onClick = {
+                            isDoctorExporting = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            coroutineScope.launch {
+                                val file = ExportUtils.generateDoctorPdf(context, entriesForPeriod, startDate, endDate)
+                                isDoctorExporting = false
+                                if (file != null) {
+                                    ExportUtils.sharePdf(context, file)
+                                }
+                            }
+                        },
+                        enabled = !isReportExporting && !isDoctorExporting && !isGuideExporting,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(64.dp),
+                        shape = RoundedCornerShape(24.dp),
+                        contentPadding = PaddingValues(horizontal = 18.dp)
+                    ) {
+                        if (isDoctorExporting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.MedicalServices, contentDescription = null)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.Start
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.export_doctor_title),
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = stringResource(R.string.export_doctor_subtitle),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.78f)
+                                )
+                            }
+                        }
+                    }
+
+                    FilledTonalButton(
+                        onClick = {
                             isGuideExporting = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             coroutineScope.launch {
@@ -215,7 +263,7 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
                                 }
                             }
                         },
-                        enabled = !isReportExporting && !isGuideExporting,
+                        enabled = !isReportExporting && !isDoctorExporting && !isGuideExporting,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),

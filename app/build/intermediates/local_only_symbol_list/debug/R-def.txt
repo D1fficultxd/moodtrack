@@ -24,6 +24,8 @@ string disclaimer
 string entry_saved
 string error_invalid_range
 string export_description
+string export_doctor_subtitle
+string export_doctor_title
 string export_from
 string export_include_rating_guide
 string export_period
@@ -173,6 +175,7 @@ string lang_system
 string language
 string legend
 string legend_entry
+string legend_note
 string legend_risk
 string legend_today
 string loss_of_interest

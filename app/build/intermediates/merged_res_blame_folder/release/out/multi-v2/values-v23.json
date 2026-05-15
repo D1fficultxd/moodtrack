@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.d1ff.moodtrack.app-mergeReleaseResources-60:/values-v23/values-v23.xml",
+            "outputFile": "com.d1ff.moodtrack.app-mergeReleaseResources-62:/values-v23/values-v23.xml",
             "map": [
                 {
                     "source": "/Users/d1ff/.gradle/caches/transforms-3/312fa0c8f45d7b9dedb5ecbd13ef3f9d/transformed/work-runtime-2.9.0/res/values-v23/values-v23.xml",
