@@ -1,24 +1,23 @@
+.gradle/
+build/
+*/build/
+local.properties
+*.jks
+*.keystore
+keystore.properties
+.DS_Store
+
 *.iml
-.gradle
-/local.properties
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
-.DS_Store
-/build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
-
-# Keystore files
-*.jks
-*.keystore
-keystore.properties
-*.p12
 
 # Signing secrets (if stored in separate files)
 signing.properties
+*.p12
