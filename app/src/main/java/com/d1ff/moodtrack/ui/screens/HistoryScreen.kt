@@ -158,9 +158,9 @@ fun MonthSelector(currentMonth: YearMonth, onMonthChange: (YearMonth) -> Unit) {
 
 @Composable
 fun CalendarGrid(month: YearMonth, entries: List<DailyEntry>, onDateClick: (LocalDate) -> Unit) {
-    val daysInMonth = month.lengthOfMonth()
-    val firstDayOfMonth = month.atDay(1).dayOfWeek.value // 1 (Mon) to 7 (Sun)
-    val daysBefore = firstDayOfMonth - 1
+    val daysInMonth = remember(month) { month.lengthOfMonth() }
+    val daysBefore = remember(month) { month.atDay(1).dayOfWeek.value - 1 }
+    val rows = remember(daysInMonth, daysBefore) { (daysInMonth + daysBefore + 6) / 7 }
     val today = remember { LocalDate.now() }
     val entriesByDate = remember(entries) { entries.associateBy { it.date } }
     
@@ -187,9 +187,6 @@ fun CalendarGrid(month: YearMonth, entries: List<DailyEntry>, onDateClick: (Loca
         }
         
         Spacer(modifier = Modifier.height(8.dp))
-        
-        val totalCells = daysInMonth + daysBefore
-        val rows = (totalCells + 6) / 7
         
         for (row in 0 until rows) {
             Row(modifier = Modifier.fillMaxWidth()) {
@@ -304,22 +301,15 @@ fun Legend() {
             verticalAlignment = Alignment.CenterVertically
         ) {
             LegendChip(
-                text = stringResource(R.string.legend_today),
-                dotColor = MaterialTheme.colorScheme.primary
-            )
-            LegendChip(
                 text = stringResource(R.string.legend_entry),
                 dotColor = MaterialTheme.colorScheme.secondary
             )
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
             LegendChip(
                 text = stringResource(R.string.legend_risk),
                 dotColor = MaterialTheme.colorScheme.error
             )
+        }
+        Row {
             LegendChip(
                 text = stringResource(R.string.legend_note),
                 dotColor = MaterialTheme.colorScheme.tertiary

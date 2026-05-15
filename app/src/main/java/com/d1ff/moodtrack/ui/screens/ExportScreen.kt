@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,6 +28,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -39,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -62,6 +67,7 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+    val snackbarHostState = remember { SnackbarHostState() }
     var isReportExporting by remember { mutableStateOf(false) }
     var isDoctorExporting by remember { mutableStateOf(false) }
     var isGuideExporting by remember { mutableStateOf(false) }
@@ -76,15 +82,21 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
         }
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(horizontal = 16.dp),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    Scaffold(
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         item {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -209,10 +221,30 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
 
                     FilledTonalButton(
                         onClick = {
+                            val doctorEndDate = LocalDate.now()
+                            val doctorStartDate = doctorEndDate.minusDays(13)
+                            val doctorEntries = allEntries.filter {
+                                val d = runCatching { LocalDate.parse(it.date) }.getOrNull()
+                                d != null && (d.isEqual(doctorStartDate) || d.isAfter(doctorStartDate)) &&
+                                    (d.isEqual(doctorEndDate) || d.isBefore(doctorEndDate))
+                            }
+
+                            if (doctorEntries.isEmpty()) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.export_doctor_empty))
+                                }
+                                return@FilledTonalButton
+                            }
                             isDoctorExporting = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             coroutineScope.launch {
-                                val file = ExportUtils.generateDoctorPdf(context, entriesForPeriod, startDate, endDate)
+                                val file = ExportUtils.generateDoctorPdf(
+                                    context = context,
+                                    entries = doctorEntries,
+                                    start = doctorStartDate,
+                                    end = doctorEndDate
+                                )
                                 isDoctorExporting = false
                                 if (file != null) {
                                     ExportUtils.sharePdf(context, file)
@@ -303,5 +335,6 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
                 }
             }
         }
+    }
     }
 }

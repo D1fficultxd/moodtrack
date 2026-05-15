@@ -345,8 +345,9 @@
     <string name="entry_saved">Entry saved</string>
     <string name="error_invalid_range">Value must be between %1$.1f and %2$.1f</string>
     <string name="export_description">The app will generate a detailed PDF report with statistics and all entries for the selected period.</string>
-    <string name="export_doctor_subtitle">PDF with summary, tables, and rating guide</string>
-    <string name="export_doctor_title">Doctor report</string>
+    <string name="export_doctor_empty">No entries in the last 14 days</string>
+    <string name="export_doctor_subtitle">Last 14 days report with rating guide</string>
+    <string name="export_doctor_title">Export for doctor</string>
     <string name="export_from">From</string>
     <string name="export_include_rating_guide">Include rating guide in report</string>
     <string name="export_period">Select period</string>
@@ -710,6 +711,13 @@
     <string name="pdf_guide_suicidal_3">3 — risk or intent</string>
     <string name="pdf_guide_suicidal_intro">Uses the current app scale. If the current scale is 0–3:</string>
     <string name="pdf_guide_suicidal_title">Suicidal thoughts</string>
+    <string name="pdf_key_observations_empty">No entries were found for this period.</string>
+    <string name="pdf_key_observations_max_anxiety">Maximum anxiety: %1$s</string>
+    <string name="pdf_key_observations_min_sleep">Minimum sleep: %1$s</string>
+    <string name="pdf_key_observations_note_days">Days with notes: %1$d</string>
+    <string name="pdf_key_observations_period_days">Days included in the report: %1$d</string>
+    <string name="pdf_key_observations_risk_days">Days with elevated risk: %1$d</string>
+    <string name="pdf_key_observations_title">Key observations</string>
     <string name="pdf_main_metrics_title">Main daily indicators</string>
     <string name="pdf_no">No</string>
     <string name="pdf_no_entries_for_period">No entries in the selected period.</string>

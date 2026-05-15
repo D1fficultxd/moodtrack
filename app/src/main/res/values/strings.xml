@@ -65,8 +65,9 @@
     <string name="generate_pdf">Generate PDF</string>
     <string name="export_include_rating_guide">Include rating guide in report</string>
     <string name="export_rating_guide">Export rating guide</string>
-    <string name="export_doctor_title">Doctor report</string>
-    <string name="export_doctor_subtitle">PDF with summary, tables, and rating guide</string>
+    <string name="export_doctor_title">Export for doctor</string>
+    <string name="export_doctor_subtitle">Last 14 days report with rating guide</string>
+    <string name="export_doctor_empty">No entries in the last 14 days</string>
     <string name="no_data_export">No saved entries yet. The report will be empty.</string>
     <string name="no_entries_period">No entries in the selected period</string>
 
@@ -159,6 +160,13 @@
     <string name="pdf_summary_max_anxiety_label">Maximum anxiety</string>
     <string name="pdf_summary_max_racing_label">Maximum racing thoughts</string>
     <string name="pdf_summary_max_impulsivity_label">Maximum impulsivity</string>
+    <string name="pdf_key_observations_title">Key observations</string>
+    <string name="pdf_key_observations_empty">No entries were found for this period.</string>
+    <string name="pdf_key_observations_period_days">Days included in the report: %1$d</string>
+    <string name="pdf_key_observations_risk_days">Days with elevated risk: %1$d</string>
+    <string name="pdf_key_observations_note_days">Days with notes: %1$d</string>
+    <string name="pdf_key_observations_min_sleep">Minimum sleep: %1$s</string>
+    <string name="pdf_key_observations_max_anxiety">Maximum anxiety: %1$s</string>
 
     <string name="pdf_main_metrics_title">Main daily indicators</string>
     <string name="pdf_additional_metrics_title">Additional indicators</string>

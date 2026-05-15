@@ -62,7 +62,13 @@ object ExportUtils {
         end: LocalDate
     ): File? = withContext(Dispatchers.IO) {
         createPdf(context, "moodtrack_doctor_report_${fileTimestamp()}.pdf") { writer ->
-            drawReport(writer, entries.sortedBy { it.parsedDate() }, start, end)
+            drawReport(
+                writer = writer,
+                entries = entries.sortedBy { it.parsedDate() },
+                start = start,
+                end = end,
+                includeKeyObservations = true
+            )
             writer.startNewPage()
             drawRatingGuide(writer)
         }
@@ -101,7 +107,8 @@ object ExportUtils {
         writer: PdfWriter,
         entries: List<DailyEntry>,
         start: LocalDate,
-        end: LocalDate
+        end: LocalDate,
+        includeKeyObservations: Boolean = false
     ) {
         val context = writer.context
         val style = writer.style
@@ -134,6 +141,10 @@ object ExportUtils {
         )
 
         drawSummary(writer, entries, locale)
+
+        if (includeKeyObservations) {
+            drawKeyObservations(writer, entries, locale)
+        }
 
         drawMetricsTable(
             writer = writer,
@@ -193,6 +204,48 @@ object ExportUtils {
             writer.y += rowHeight
         }
         writer.y += 12f
+    }
+
+    private fun drawKeyObservations(writer: PdfWriter, entries: List<DailyEntry>, locale: Locale) {
+        val context = writer.context
+        val dash = context.getString(R.string.pdf_empty_value)
+        val observations = if (entries.isEmpty()) {
+            listOf(context.getString(R.string.pdf_key_observations_empty))
+        } else {
+            listOf(
+                context.getString(R.string.pdf_key_observations_period_days, entries.size),
+                context.getString(
+                    R.string.pdf_key_observations_risk_days,
+                    entries.count { it.selfHarm || it.suicidalThoughts > 0 }
+                ),
+                context.getString(
+                    R.string.pdf_key_observations_note_days,
+                    entries.count { it.note.isNotBlank() }
+                ),
+                context.getString(
+                    R.string.pdf_key_observations_min_sleep,
+                    entries.minOfOrNull { it.sleepHours.toDouble() }.asHours(context, locale)
+                ),
+                context.getString(
+                    R.string.pdf_key_observations_max_anxiety,
+                    entries.maxOfOrNull { it.anxiety.toDouble() }.asScale(locale, dash)
+                )
+            )
+        }
+
+        drawSectionTitle(writer, context.getString(R.string.pdf_key_observations_title))
+        observations.forEach { observation ->
+            drawWrappedParagraph(
+                writer = writer,
+                text = "- $observation",
+                paint = writer.style.body,
+                x = MARGIN + 8f,
+                maxWidth = CONTENT_WIDTH - 8f,
+                lineHeight = BODY_LINE_HEIGHT,
+                bottomSpacing = 1f
+            )
+        }
+        writer.y += 10f
     }
 
     private fun drawMetricsTable(

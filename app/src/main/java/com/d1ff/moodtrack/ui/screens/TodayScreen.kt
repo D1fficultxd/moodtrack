@@ -565,12 +565,18 @@ fun TodayScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val suicidalOptions = listOf(
-                    stringResource(R.string.suicidal_none),
-                    stringResource(R.string.suicidal_passive),
-                    stringResource(R.string.suicidal_frequent),
-                    stringResource(R.string.suicidal_high)
-                )
+                val suicidalNone = stringResource(R.string.suicidal_none)
+                val suicidalPassive = stringResource(R.string.suicidal_passive)
+                val suicidalFrequent = stringResource(R.string.suicidal_frequent)
+                val suicidalHigh = stringResource(R.string.suicidal_high)
+                val suicidalOptions = remember(
+                    suicidalNone,
+                    suicidalPassive,
+                    suicidalFrequent,
+                    suicidalHigh
+                ) {
+                    listOf(suicidalNone, suicidalPassive, suicidalFrequent, suicidalHigh)
+                }
                 suicidalOptions.forEachIndexed { index, text ->
                     SuicidalOptionRow(
                         text = text,

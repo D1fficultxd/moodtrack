@@ -57,7 +57,8 @@
     <string name="entry_saved">Запись сохранена</string>
     <string name="error_invalid_range">Значение должно быть от %1$.1f до %2$.1f</string>
     <string name="export_description">Приложение сгенерирует подробный PDF-отчет со статистикой и всеми записями за выбранный период.</string>
-    <string name="export_doctor_subtitle">PDF со сводкой, таблицами и методикой оценки</string>
+    <string name="export_doctor_empty">За последние 14 дней нет записей</string>
+    <string name="export_doctor_subtitle">Отчет за последние 14 дней с методикой оценки</string>
     <string name="export_doctor_title">Экспорт для врача</string>
     <string name="export_from">С</string>
     <string name="export_include_rating_guide">Добавить методику оценки в отчет</string>
@@ -418,6 +419,13 @@
     <string name="pdf_guide_suicidal_3">3 — риск или намерение</string>
     <string name="pdf_guide_suicidal_intro">Используй текущую шкалу приложения. Если текущая шкала 0–3:</string>
     <string name="pdf_guide_suicidal_title">Суицидальные мысли</string>
+    <string name="pdf_key_observations_empty">За выбранный период записи не найдены.</string>
+    <string name="pdf_key_observations_max_anxiety">Максимальная тревога: %1$s</string>
+    <string name="pdf_key_observations_min_sleep">Минимальный сон: %1$s</string>
+    <string name="pdf_key_observations_note_days">Дней с заметками: %1$d</string>
+    <string name="pdf_key_observations_period_days">Дней в отчете: %1$d</string>
+    <string name="pdf_key_observations_risk_days">Дней с повышенным риском: %1$d</string>
+    <string name="pdf_key_observations_title">Ключевые наблюдения</string>
     <string name="pdf_main_metrics_title">Основные ежедневные показатели</string>
     <string name="pdf_no">Нет</string>
     <string name="pdf_no_entries_for_period">В выбранном периоде нет записей.</string>

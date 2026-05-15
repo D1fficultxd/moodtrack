@@ -4,10 +4,10 @@
     package="com.d1ff.moodtrack"
     minSdkVersion="26"
     targetSdkVersion="34"
-    mergedManifest="build/intermediates/merged_manifest/release/AndroidManifest.xml"
+    mergedManifest="build/intermediates/merged_manifest/release/processReleaseMainManifest/AndroidManifest.xml"
     manifestMergeReport="build/outputs/logs/manifest-merger-release-report.txt"
-    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.2.2:proguard-rules.pro"
-    partialResultsDir="build/intermediates/lint_vital_partial_results/release/out">
+    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.5.2:proguard-rules.pro"
+    partialResultsDir="build/intermediates/lint_vital_partial_results/release/lintVitalAnalyzeRelease/out">
   <buildFeatures
       namespacing="REQUIRED"/>
   <sourceProviders>
@@ -22,11 +22,11 @@
   <testFixturesSourceProviders>
   </testFixturesSourceProviders>
   <artifact
-      classOutputs="build/intermediates/javac/release/classes:build/tmp/kotlin-classes/release:build/kotlinToolingMetadata:build/generated/ksp/release/resources:build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/release/R.jar"
+      classOutputs="build/intermediates/javac/release/compileReleaseJavaWithJavac/classes:build/tmp/kotlin-classes/release:build/kotlinToolingMetadata:build/generated/ksp/release/resources:build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/release/processReleaseResources/R.jar"
       type="MAIN"
       applicationId="com.d1ff.moodtrack"
       generatedSourceFolders="build/generated/ksp/release/java:build/generated/ksp/release/kotlin:build/generated/ap_generated_sources/release/out"
       generatedResourceFolders="build/generated/res/resValues/release"
-      desugaredMethodsFiles="/Users/d1ff/.gradle/caches/transforms-3/63983c47a724cfe4af2e010af69bd642/transformed/D8BackportedDesugaredMethods.txt">
+      desugaredMethodsFiles="/Users/d1ff/.gradle/caches/transforms-4/0459f3885b0374e959a1b130631bf742/transformed/D8BackportedDesugaredMethods.txt">
   </artifact>
 </variant>
