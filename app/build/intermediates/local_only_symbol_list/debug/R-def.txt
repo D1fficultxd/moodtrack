@@ -362,6 +362,7 @@ string risk_warning
 string save
 string search_hint
 string section_anxiety
+string section_core_metrics
 string section_depression
 string section_depressive_expand
 string section_note

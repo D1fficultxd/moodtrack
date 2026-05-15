@@ -280,32 +280,59 @@ fun DayCell(
 
 @Composable
 fun Legend() {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             stringResource(R.string.legend),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer))
-            Text(
-                " " + stringResource(R.string.legend_today),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            LegendChip(
+                text = stringResource(R.string.legend_today),
+                dotColor = MaterialTheme.colorScheme.primaryContainer
             )
-            Spacer(modifier = Modifier.width(16.dp))
-            Box(modifier = Modifier.size(12.dp).clip(CircleShape).background(MaterialTheme.colorScheme.secondaryContainer))
-            Text(
-                " " + stringResource(R.string.legend_entry),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface
+            LegendChip(
+                text = stringResource(R.string.legend_entry),
+                dotColor = MaterialTheme.colorScheme.secondaryContainer
             )
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.error))
+        Row {
+            LegendChip(
+                text = stringResource(R.string.legend_risk),
+                dotColor = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
+@Composable
+private fun LegendChip(
+    text: String,
+    dotColor: Color
+) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(9.dp)
+                    .clip(CircleShape)
+                    .background(dotColor)
+            )
             Text(
-                " " + stringResource(R.string.legend_risk),
+                text = text,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )

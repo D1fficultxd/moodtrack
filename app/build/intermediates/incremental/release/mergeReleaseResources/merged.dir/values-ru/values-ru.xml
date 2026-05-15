@@ -460,6 +460,7 @@
     <string name="search_hint">Поиск метрик...</string>
     <string msgid="6264217191555673260" name="search_menu_title">"Поиск"</string>
     <string name="section_anxiety">Тревога и возбуждение</string>
+    <string name="section_core_metrics">Основные показатели</string>
     <string name="section_depression">Депрессивное состояние</string>
     <string name="section_depressive_expand">Депрессивное состояние</string>
     <string name="section_note">Заметка</string>

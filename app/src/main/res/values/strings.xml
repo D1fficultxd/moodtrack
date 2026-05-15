@@ -13,6 +13,7 @@
     <string name="entry_saved">Entry saved</string>
 
     <string name="section_sleep">Sleep</string>
+    <string name="section_core_metrics">Core metrics</string>
     <string name="sleep_hours">Hours: %1$.1f</string>
     <string name="sleep_ease">Ease of falling asleep: %1$d</string>
 

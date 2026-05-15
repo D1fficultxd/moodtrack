@@ -1376,6 +1376,7 @@ string save
 string search_hint
 string search_menu_title
 string section_anxiety
+string section_core_metrics
 string section_depression
 string section_depressive_expand
 string section_note

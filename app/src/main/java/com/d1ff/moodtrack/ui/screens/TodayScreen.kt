@@ -2,6 +2,7 @@ package com.d1ff.moodtrack.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -31,6 +32,7 @@ import com.d1ff.moodtrack.R
 import com.d1ff.moodtrack.data.DailyEntry
 import com.d1ff.moodtrack.ui.components.ExpressiveSectionHeader
 import com.d1ff.moodtrack.ui.components.GlassCard
+import com.d1ff.moodtrack.ui.components.MetricLabelWithHelp
 import com.d1ff.moodtrack.ui.components.MetricSlider
 import com.d1ff.moodtrack.viewmodel.MoodViewModel
 import kotlinx.coroutines.delay
@@ -52,9 +54,8 @@ fun TodayScreen(
 ) {
     val dateToLoad = initialDate ?: LocalDate.now().toString()
     val entries by viewModel.allEntries.collectAsState()
-    val entryForDate = remember(entries, dateToLoad) {
-        entries.find { it.date == dateToLoad }
-    }
+    val entriesByDate = remember(entries) { entries.associateBy { it.date } }
+    val entryForDate = remember(entriesByDate, dateToLoad) { entriesByDate[dateToLoad] }
     
     val scrollState = rememberScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -86,11 +87,17 @@ fun TodayScreen(
     
     var depressiveExpanded by rememberSaveable { mutableStateOf(false) }
     var racingExpanded by rememberSaveable { mutableStateOf(false) }
-    var actionsExpanded by remember { mutableStateOf(false) }
 
     var saveStatus by remember { mutableStateOf(SaveStatus.IDLE) }
+    val todayString = remember { LocalDate.now().toString() }
+    val parsedDate = remember(dateToLoad) { LocalDate.parse(dateToLoad) }
+    val titleFormatter = remember { DateTimeFormatter.ofPattern("d MMMM yyyy") }
 
     val isHighRisk = suicidalThoughts == 3 || selfHarm
+
+    BackHandler(enabled = onBack != null) {
+        onBack?.invoke()
+    }
 
     // Debounced Autosave Logic
     LaunchedEffect(
@@ -229,10 +236,8 @@ fun TodayScreen(
             TopAppBar(
                 title = {
                     Column {
-                        val parsedDate = LocalDate.parse(dateToLoad)
-                        val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
                         Text(
-                            text = if (dateToLoad == LocalDate.now().toString()) stringResource(R.string.today_title) else parsedDate.format(formatter),
+                            text = if (dateToLoad == todayString) stringResource(R.string.today_title) else parsedDate.format(titleFormatter),
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp
                         )
@@ -279,37 +284,6 @@ fun TodayScreen(
                             contentDescription = stringResource(R.string.guide_title)
                         )
                     }
-                    Box {
-                        IconButton(
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                actionsExpanded = true
-                            }
-                        ) {
-                            Icon(Icons.Default.MoreVert, contentDescription = null)
-                        }
-                        DropdownMenu(
-                            expanded = actionsExpanded,
-                            onDismissRequest = { actionsExpanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(if (entryForDate != null) R.string.update else R.string.save)) },
-                                leadingIcon = { Icon(Icons.Default.Save, contentDescription = null) },
-                                onClick = {
-                                    actionsExpanded = false
-                                    saveNow()
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.clear)) },
-                                leadingIcon = { Icon(Icons.Default.DeleteSweep, contentDescription = null) },
-                                onClick = {
-                                    actionsExpanded = false
-                                    resetForm()
-                                }
-                            )
-                        }
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -343,8 +317,7 @@ fun TodayScreen(
                 }
             }
 
-            // Main Section
-            SectionCard(stringResource(R.string.section_sleep), Icons.Default.Bed) {
+            SectionCard(stringResource(R.string.section_core_metrics), Icons.Default.Insights) {
                 MetricSlider(
                     title = stringResource(R.string.sleep_hours_label), 
                     value = sleepHours, 
@@ -364,27 +337,7 @@ fun TodayScreen(
                         ))
                     }
                 )
-                MetricSlider(
-                    title = stringResource(R.string.sleep_ease_label), 
-                    value = sleepEase.toFloat(), 
-                    onValueChange = { sleepEase = it.toInt() },
-                    range = 0f..10f,
-                    steps = 9,
-                    label = getEaseLabel(sleepEase),
-                    onHelpClick = {
-                        updateHelp(R.string.guide_sleep_ease_title, listOf(
-                            R.string.guide_sleep_ease_0,
-                            R.string.guide_sleep_ease_1_2,
-                            R.string.guide_sleep_ease_3_4,
-                            R.string.guide_sleep_ease_5_6,
-                            R.string.guide_sleep_ease_7_8,
-                            R.string.guide_sleep_ease_9_10
-                        ))
-                    }
-                )
-            }
 
-            SectionCard(stringResource(R.string.mood_label), Icons.Default.SentimentSatisfied) {
                 MetricSlider(
                     title = stringResource(R.string.mood_label), 
                     value = mood.toFloat(), 
@@ -404,9 +357,7 @@ fun TodayScreen(
                         ))
                     }
                 )
-            }
 
-            SectionCard(stringResource(R.string.anxiety_label), Icons.Default.Psychology) {
                 MetricSlider(
                     title = stringResource(R.string.anxiety_label), 
                     value = anxiety.toFloat(), 
@@ -577,19 +528,21 @@ fun TodayScreen(
             }
 
             SectionCard(stringResource(R.string.section_risks), Icons.Default.Warning) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.suicidal_thoughts_label), style = MaterialTheme.typography.titleSmall)
-                    IconButton(onClick = {
+                MetricLabelWithHelp(
+                    title = stringResource(R.string.suicidal_thoughts_label),
+                    textStyle = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    onHelpClick = {
                         updateHelp(R.string.guide_suicidal_title, listOf(
                             R.string.guide_suicidal_0,
                             R.string.guide_suicidal_1,
                             R.string.guide_suicidal_2,
                             R.string.guide_suicidal_3
                         ))
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, modifier = Modifier.size(18.dp))
                     }
-                }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
                 val suicidalOptions = listOf(
                     stringResource(R.string.suicidal_none),
                     stringResource(R.string.suicidal_passive),
@@ -597,92 +550,32 @@ fun TodayScreen(
                     stringResource(R.string.suicidal_high)
                 )
                 suicidalOptions.forEachIndexed { index, text ->
-                    val isSelected = suicidalThoughts == index
-                    Surface(
+                    SuicidalOptionRow(
+                        text = text,
+                        selected = suicidalThoughts == index,
                         onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            suicidalThoughts = index
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainer
-                        },
-                        border = BorderStroke(
-                            width = 1.dp,
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
-                            } else {
-                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f)
+                            if (suicidalThoughts != index) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                suicidalThoughts = index
                             }
-                        )
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(12.dp)
-                        ) {
-                            RadioButton(
-                                selected = isSelected,
-                                onClick = null // Click handled by parent Surface
-                            )
-                            Text(
-                                text = text,
-                                modifier = Modifier.padding(start = 12.dp),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-                            )
                         }
-                    }
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    onClick = {
+                SelfHarmRow(
+                    checked = selfHarm,
+                    onToggle = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         selfHarm = !selfHarm
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = if (selfHarm) {
-                        MaterialTheme.colorScheme.errorContainer
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer
-                    },
-                    border = BorderStroke(
-                        width = 1.dp,
-                        color = if (selfHarm) {
-                            MaterialTheme.colorScheme.error.copy(alpha = 0.30f)
-                        } else {
-                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f)
-                        }
-                    )
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(12.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.self_harm),
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = if (selfHarm) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
-                        )
-                        IconButton(onClick = {
+                    onHelpClick = {
                             updateHelp(R.string.guide_self_harm_title, listOf(
                                 R.string.guide_self_harm_desc,
                                 R.string.guide_self_harm_rule
                             ))
-                        }) {
-                            Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, modifier = Modifier.size(18.dp))
-                        }
-                        Switch(
-                            checked = selfHarm,
-                            onCheckedChange = null // Click handled by parent Surface
-                        )
                     }
-                }
+                )
             }
 
             SectionCard(stringResource(R.string.section_note), Icons.AutoMirrored.Filled.Note) {
@@ -696,6 +589,144 @@ fun TodayScreen(
                 )
             }
 
+            TodayActionButtons(
+                isExistingEntry = entryForDate != null,
+                onClear = { resetForm() },
+                onSave = { saveNow() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SuicidalOptionRow(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 3.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        },
+        contentColor = if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (selected) {
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f)
+            }
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            RadioButton(
+                selected = selected,
+                onClick = null,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colorScheme.secondary,
+                    unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+            Text(
+                text = text,
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+            )
+        }
+    }
+}
+
+@Composable
+private fun SelfHarmRow(
+    checked: Boolean,
+    onToggle: () -> Unit,
+    onHelpClick: () -> Unit
+) {
+    Surface(
+        onClick = onToggle,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = if (checked) {
+            MaterialTheme.colorScheme.errorContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        },
+        contentColor = if (checked) {
+            MaterialTheme.colorScheme.onErrorContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (checked) {
+                MaterialTheme.colorScheme.error.copy(alpha = 0.30f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f)
+            }
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+        ) {
+            MetricLabelWithHelp(
+                title = stringResource(R.string.self_harm),
+                onHelpClick = onHelpClick,
+                textStyle = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = null
+            )
+        }
+    }
+}
+
+@Composable
+private fun TodayActionButtons(
+    isExistingEntry: Boolean,
+    onClear: () -> Unit,
+    onSave: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OutlinedButton(
+            onClick = onClear,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(20.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            Icon(Icons.Default.DeleteSweep, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(R.string.clear))
+        }
+        FilledTonalButton(
+            onClick = onSave,
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(20.dp),
+            contentPadding = PaddingValues(vertical = 12.dp)
+        ) {
+            Icon(Icons.Default.Save, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text(stringResource(if (isExistingEntry) R.string.update else R.string.save))
         }
     }
 }

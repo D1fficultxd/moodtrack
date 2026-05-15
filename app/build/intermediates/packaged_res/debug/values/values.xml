@@ -359,6 +359,7 @@
     <string name="save">Save</string>
     <string name="search_hint">Search metrics...</string>
     <string name="section_anxiety">Anxiety and Arousal</string>
+    <string name="section_core_metrics">Core metrics</string>
     <string name="section_depression">Depressive State</string>
     <string name="section_depressive_expand">Depressive State</string>
     <string name="section_note">Note</string>

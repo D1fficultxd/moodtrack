@@ -13,6 +13,7 @@
     <string name="entry_saved">Запись сохранена</string>
 
     <string name="section_sleep">Сон</string>
+    <string name="section_core_metrics">Основные показатели</string>
     <string name="sleep_hours">Часов: %1$.1f</string>
     <string name="sleep_ease">Легкость засыпания: %1$d</string>
 

@@ -72,7 +72,7 @@ fun MainScreen() {
             ) {
                 NavigationBar(
                     modifier = Modifier.navigationBarsPadding(),
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
                     tonalElevation = 0.dp
                 ) {
                     items.forEach { screen ->
@@ -119,7 +119,11 @@ fun MainScreen() {
             popExitTransition = { fadeOut(animationSpec = tween(300)) }
         ) {
             composable(Screen.Export.route) { ExportScreen() }
-            composable(Screen.Today.route) { TodayScreen(onNavigateToGuide = { navController.navigate(Screen.Guide.route) }) }
+            composable(Screen.Today.route) {
+                TodayScreen(onNavigateToGuide = {
+                    navController.navigate(Screen.Guide.route) { launchSingleTop = true }
+                })
+            }
             composable(Screen.Calendar.route) { 
                 HistoryScreen(onNavigateToEdit = { date -> 
                     navController.navigate("calendar/edit/$date")
@@ -130,12 +134,14 @@ fun MainScreen() {
                 TodayScreen(
                     initialDate = date, 
                     onBack = { navController.popBackStack() },
-                    onNavigateToGuide = { navController.navigate(Screen.Guide.route) }
+                    onNavigateToGuide = {
+                        navController.navigate(Screen.Guide.route) { launchSingleTop = true }
+                    }
                 )
             }
             composable(Screen.Settings.route) { 
                 SettingsScreen(onNavigateToGuide = { 
-                    navController.navigate(Screen.Guide.route)
+                    navController.navigate(Screen.Guide.route) { launchSingleTop = true }
                 }) 
             }
             composable(Screen.Guide.route) {

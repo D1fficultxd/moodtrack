@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.d1ff.moodtrack.R
 import java.util.Locale
@@ -41,34 +42,12 @@ fun MetricSlider(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            MetricLabelWithHelp(
+                title = title,
+                onHelpClick = onHelpClick,
+                onTitleClick = { showDialog = true },
                 modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.clickable { showDialog = true }
-                )
-                if (onHelpClick != null) {
-                    IconButton(
-                        onClick = onHelpClick,
-                        modifier = Modifier.size(32.dp),
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.HelpOutline,
-                            contentDescription = "Help",
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
+            )
             Surface(
                 onClick = { showDialog = true },
                 shape = RoundedCornerShape(18.dp),
@@ -176,5 +155,49 @@ fun MetricSlider(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun MetricLabelWithHelp(
+    title: String,
+    onHelpClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
+    onTitleClick: (() -> Unit)? = null,
+    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.bodyLarge,
+    fontWeight: FontWeight = FontWeight.Medium
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = textStyle,
+            fontWeight = fontWeight,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .then(if (onTitleClick != null) Modifier.clickable { onTitleClick() } else Modifier)
+        )
+        if (onHelpClick != null) {
+            Spacer(modifier = Modifier.width(6.dp))
+            IconButton(
+                onClick = onHelpClick,
+                modifier = Modifier.size(40.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Outlined.HelpOutline,
+                    contentDescription = "Help",
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
     }
 }
