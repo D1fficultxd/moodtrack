@@ -27,6 +27,6 @@
       applicationId="com.d1ff.moodtrack"
       generatedSourceFolders="build/generated/ksp/release/java:build/generated/ksp/release/kotlin:build/generated/ap_generated_sources/release/out"
       generatedResourceFolders="build/generated/res/resValues/release"
-      desugaredMethodsFiles="/Users/d1ff/.gradle/caches/transforms-3/f82e0d430988553080b2f5619373f40b/transformed/D8BackportedDesugaredMethods.txt">
+      desugaredMethodsFiles="/Users/d1ff/.gradle/caches/transforms-3/63983c47a724cfe4af2e010af69bd642/transformed/D8BackportedDesugaredMethods.txt">
   </artifact>
 </variant>

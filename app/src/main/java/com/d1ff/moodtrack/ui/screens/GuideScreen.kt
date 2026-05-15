@@ -9,10 +9,12 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.d1ff.moodtrack.R
+import com.d1ff.moodtrack.ui.components.GlassCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,6 +23,8 @@ fun GuideScreen(onBack: () -> Unit) {
     val scrollState = rememberScrollState()
 
     Scaffold(
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.guide_title)) },
@@ -28,7 +32,11 @@ fun GuideScreen(onBack: () -> Unit) {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.94f)
+                )
             )
         }
     ) { innerPadding ->
@@ -36,6 +44,7 @@ fun GuideScreen(onBack: () -> Unit) {
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .verticalScroll(scrollState)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -205,10 +214,7 @@ fun GuideScreen(onBack: () -> Unit) {
                 it.title.contains(searchQuery, ignoreCase = true) || 
                 it.items.any { item -> item.contains(searchQuery, ignoreCase = true) } 
             }.forEach { section ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large
-                ) {
+                GlassCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = section.title,

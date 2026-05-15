@@ -15,6 +15,7 @@ import androidx.room.util.DBUtil;
 import androidx.sqlite.db.SupportSQLiteStatement;
 import java.lang.Class;
 import java.lang.Exception;
+import java.lang.Integer;
 import java.lang.Object;
 import java.lang.Override;
 import java.lang.String;
@@ -161,20 +162,20 @@ public final class DailyEntryDao_Impl implements DailyEntryDao {
   }
 
   @Override
-  public Object deleteById(final long id, final Continuation<? super Unit> $completion) {
-    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+  public Object deleteById(final long id, final Continuation<? super Integer> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
       @Override
       @NonNull
-      public Unit call() throws Exception {
+      public Integer call() throws Exception {
         final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteById.acquire();
         int _argIndex = 1;
         _stmt.bindLong(_argIndex, id);
         try {
           __db.beginTransaction();
           try {
-            _stmt.executeUpdateDelete();
+            final Integer _result = _stmt.executeUpdateDelete();
             __db.setTransactionSuccessful();
-            return Unit.INSTANCE;
+            return _result;
           } finally {
             __db.endTransaction();
           }
@@ -186,18 +187,18 @@ public final class DailyEntryDao_Impl implements DailyEntryDao {
   }
 
   @Override
-  public Object deleteAll(final Continuation<? super Unit> $completion) {
-    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+  public Object deleteAll(final Continuation<? super Integer> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Integer>() {
       @Override
       @NonNull
-      public Unit call() throws Exception {
+      public Integer call() throws Exception {
         final SupportSQLiteStatement _stmt = __preparedStmtOfDeleteAll.acquire();
         try {
           __db.beginTransaction();
           try {
-            _stmt.executeUpdateDelete();
+            final Integer _result = _stmt.executeUpdateDelete();
             __db.setTransactionSuccessful();
-            return Unit.INSTANCE;
+            return _result;
           } finally {
             __db.endTransaction();
           }

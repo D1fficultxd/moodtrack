@@ -1,8 +1,11 @@
 package com.d1ff.moodtrack.ui.screens
 
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,14 +25,22 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.d1ff.moodtrack.R
 import com.d1ff.moodtrack.data.DailyEntry
+import com.d1ff.moodtrack.ui.components.ExpressiveSectionHeader
+import com.d1ff.moodtrack.ui.components.GlassCard
 import com.d1ff.moodtrack.ui.components.MetricSlider
 import com.d1ff.moodtrack.viewmodel.MoodViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
+enum class SaveStatus {
+    IDLE, SAVING, SAVED, ERROR
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,8 +86,69 @@ fun TodayScreen(
     
     var depressiveExpanded by rememberSaveable { mutableStateOf(false) }
     var racingExpanded by rememberSaveable { mutableStateOf(false) }
+    var actionsExpanded by remember { mutableStateOf(false) }
+
+    var saveStatus by remember { mutableStateOf(SaveStatus.IDLE) }
 
     val isHighRisk = suicidalThoughts == 3 || selfHarm
+
+    // Debounced Autosave Logic
+    LaunchedEffect(
+        sleepHours, sleepEase, anxiety, irritability, impulsivity, racingThoughts,
+        mood, apathy, fatigue, lossOfInterest, hopelessness,
+        suicidalThoughts, selfHarm, note
+    ) {
+        // Skip first emission when entry is just loaded
+        if (entryForDate != null && 
+            sleepHours == entryForDate.sleepHours &&
+            sleepEase == entryForDate.sleepEase &&
+            anxiety == entryForDate.anxiety &&
+            irritability == entryForDate.irritability &&
+            impulsivity == entryForDate.impulsivity &&
+            racingThoughts == entryForDate.racingThoughts &&
+            mood == entryForDate.mood &&
+            apathy == entryForDate.apathy &&
+            fatigue == entryForDate.fatigue &&
+            lossOfInterest == entryForDate.lossOfInterest &&
+            hopelessness == entryForDate.hopelessness &&
+            suicidalThoughts == entryForDate.suicidalThoughts &&
+            selfHarm == entryForDate.selfHarm &&
+            note == entryForDate.note
+        ) {
+            return@LaunchedEffect
+        }
+
+        saveStatus = SaveStatus.SAVING
+        delay(800) // Debounce delay
+        
+        try {
+            viewModel.saveEntry(
+                DailyEntry(
+                    date = dateToLoad,
+                    sleepHours = sleepHours,
+                    sleepEase = sleepEase,
+                    anxiety = anxiety,
+                    irritability = irritability,
+                    impulsivity = impulsivity,
+                    racingThoughts = racingThoughts,
+                    mood = mood,
+                    apathy = apathy,
+                    fatigue = fatigue,
+                    lossOfInterest = lossOfInterest,
+                    hopelessness = hopelessness,
+                    suicidalThoughts = suicidalThoughts,
+                    selfHarm = selfHarm,
+                    note = note
+                )
+            )
+            saveStatus = SaveStatus.SAVED
+            delay(2000)
+            if (saveStatus == SaveStatus.SAVED) saveStatus = SaveStatus.IDLE
+        } catch (e: Exception) {
+            e.printStackTrace()
+            saveStatus = SaveStatus.ERROR
+        }
+    }
 
     if (showHelpDialog) {
         AlertDialog(
@@ -104,17 +176,82 @@ fun TodayScreen(
         showHelpDialog = true
     }
 
+    val resetForm = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        sleepHours = 8f
+        sleepEase = 0
+        anxiety = 0
+        irritability = 0
+        impulsivity = 0
+        racingThoughts = 0
+        mood = 5
+        apathy = 0
+        fatigue = 0
+        lossOfInterest = 0
+        hopelessness = 0
+        suicidalThoughts = 0
+        selfHarm = false
+        note = ""
+    }
+
+    val saveNow = {
+        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        viewModel.saveEntry(
+            DailyEntry(
+                date = dateToLoad,
+                sleepHours = sleepHours,
+                sleepEase = sleepEase,
+                anxiety = anxiety,
+                irritability = irritability,
+                impulsivity = impulsivity,
+                racingThoughts = racingThoughts,
+                mood = mood,
+                apathy = apathy,
+                fatigue = fatigue,
+                lossOfInterest = lossOfInterest,
+                hopelessness = hopelessness,
+                suicidalThoughts = suicidalThoughts,
+                selfHarm = selfHarm,
+                note = note
+            )
+        )
+        saveStatus = SaveStatus.SAVED
+        scope.launch {
+            snackbarHostState.showSnackbar(context.getString(R.string.entry_saved))
+        }
+    }
+
     Scaffold(
+        containerColor = androidx.compose.ui.graphics.Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
-                    val parsedDate = LocalDate.parse(dateToLoad)
-                    val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-                    Text(
-                        text = if (dateToLoad == LocalDate.now().toString()) stringResource(R.string.today_title) else parsedDate.format(formatter),
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column {
+                        val parsedDate = LocalDate.parse(dateToLoad)
+                        val formatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
+                        Text(
+                            text = if (dateToLoad == LocalDate.now().toString()) stringResource(R.string.today_title) else parsedDate.format(formatter),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Crossfade(targetState = saveStatus, label = "SaveStatus") { status ->
+                            val statusText = when (status) {
+                                SaveStatus.SAVING -> stringResource(R.string.status_saving)
+                                SaveStatus.SAVED -> stringResource(R.string.status_saved)
+                                SaveStatus.ERROR -> stringResource(R.string.status_save_error)
+                                else -> ""
+                            }
+                            if (statusText.isNotEmpty()) {
+                                Text(
+                                    text = statusText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (status == SaveStatus.ERROR) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                )
+                            }
+                        }
+                    }
                 },
                 navigationIcon = {
                     if (onBack != null) {
@@ -127,18 +264,57 @@ fun TodayScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onNavigateToGuide()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(R.string.guide_title))
+                    IconButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onNavigateToGuide()
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.HelpOutline,
+                            contentDescription = stringResource(R.string.guide_title)
+                        )
+                    }
+                    Box {
+                        IconButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                actionsExpanded = true
+                            }
+                        ) {
+                            Icon(Icons.Default.MoreVert, contentDescription = null)
+                        }
+                        DropdownMenu(
+                            expanded = actionsExpanded,
+                            onDismissRequest = { actionsExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(if (entryForDate != null) R.string.update else R.string.save)) },
+                                leadingIcon = { Icon(Icons.Default.Save, contentDescription = null) },
+                                onClick = {
+                                    actionsExpanded = false
+                                    saveNow()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.clear)) },
+                                leadingIcon = { Icon(Icons.Default.DeleteSweep, contentDescription = null) },
+                                onClick = {
+                                    actionsExpanded = false
+                                    resetForm()
+                                }
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-                ),
-                windowInsets = WindowInsets.statusBars
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.94f)
+                )
             )
         }
     ) { innerPadding ->
@@ -146,6 +322,7 @@ fun TodayScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .then(if (onBack != null) Modifier.navigationBarsPadding() else Modifier)
                 .verticalScroll(scrollState)
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 32.dp),
@@ -427,8 +604,20 @@ fun TodayScreen(
                             suicidalThoughts = index
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = MaterialTheme.shapes.medium,
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.surfaceContainer
+                        },
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = if (isSelected) {
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f)
+                            }
+                        )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -455,8 +644,20 @@ fun TodayScreen(
                         selfHarm = !selfHarm
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    color = if (selfHarm) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surface
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (selfHarm) {
+                        MaterialTheme.colorScheme.errorContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainer
+                    },
+                    border = BorderStroke(
+                        width = 1.dp,
+                        color = if (selfHarm) {
+                            MaterialTheme.colorScheme.error.copy(alpha = 0.30f)
+                        } else {
+                            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f)
+                        }
+                    )
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -495,84 +696,15 @@ fun TodayScreen(
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        sleepHours = 8f
-                        sleepEase = 0
-                        anxiety = 0
-                        irritability = 0
-                        impulsivity = 0
-                        racingThoughts = 0
-                        mood = 5
-                        apathy = 0
-                        fatigue = 0
-                        lossOfInterest = 0
-                        hopelessness = 0
-                        suicidalThoughts = 0
-                        selfHarm = false
-                        note = ""
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.large
-                ) {
-                    Text(stringResource(R.string.clear))
-                }
-                Button(
-                    onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        viewModel.saveEntry(
-                            DailyEntry(
-                                date = dateToLoad,
-                                sleepHours = sleepHours,
-                                sleepEase = sleepEase,
-                                anxiety = anxiety,
-                                irritability = irritability,
-                                impulsivity = impulsivity,
-                                racingThoughts = racingThoughts,
-                                mood = mood,
-                                apathy = apathy,
-                                fatigue = fatigue,
-                                lossOfInterest = lossOfInterest,
-                                hopelessness = hopelessness,
-                                suicidalThoughts = suicidalThoughts,
-                                selfHarm = selfHarm,
-                                note = note
-                            )
-                        )
-                        scope.launch {
-                            snackbarHostState.showSnackbar(context.getString(R.string.entry_saved))
-                        }
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.large
-                ) {
-                    Icon(Icons.Default.Save, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(stringResource(if (entryForDate != null) R.string.update else R.string.save))
-                }
-            }
         }
     }
 }
 
 @Composable
 fun SectionCard(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp).animateContentSize()) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(8.dp))
-                Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-            }
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            ExpressiveSectionHeader(title = title, icon = icon)
             Spacer(modifier = Modifier.height(12.dp))
             content()
         }
@@ -587,31 +719,28 @@ fun ExpandableSectionCard(
     onExpandClick: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth().clickable { onExpandClick() },
-        shape = MaterialTheme.shapes.extraLarge,
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+    GlassCard(
+        modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(16.dp).animateContentSize()) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = title, 
-                    style = MaterialTheme.typography.titleMedium, 
-                    fontWeight = FontWeight.Bold, 
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.weight(1f)
-                )
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onExpandClick() },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                ExpressiveSectionHeader(title = title, icon = icon, modifier = Modifier.weight(1f))
                 Icon(
                     if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            if (expanded) {
+            AnimatedVisibility(visible = expanded) {
+                Column {
                 Spacer(modifier = Modifier.height(12.dp))
                 content()
+                }
             }
         }
     }

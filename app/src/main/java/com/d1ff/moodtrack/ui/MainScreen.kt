@@ -1,8 +1,10 @@
 package com.d1ff.moodtrack.ui
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -10,17 +12,16 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -56,28 +57,41 @@ fun MainScreen() {
     val haptic = LocalHapticFeedback.current
 
     Scaffold(
-        modifier = Modifier.navigationBarsPadding(),
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
             
-            // Only show bottom bar on main screens and editor
-            val isEditor = currentDestination?.route?.startsWith("calendar/edit") == true
-            if (items.any { it.route == currentDestination?.route } || isEditor) {
-                NavigationBar {
+            // Only show bottom bar on main screens
+            val isMainScreen = items.any { it.route == currentDestination?.route }
+            AnimatedVisibility(
+                visible = isMainScreen,
+                enter = fadeIn(animationSpec = tween(180)),
+                exit = fadeOut(animationSpec = tween(120))
+            ) {
+                NavigationBar(
+                    modifier = Modifier.navigationBarsPadding(),
+                    containerColor = Color.Transparent,
+                    tonalElevation = 0.dp
+                ) {
                     items.forEach { screen ->
                         val selected = currentDestination?.hierarchy?.any { 
-                            it.route == screen.route || (screen is Screen.Calendar && isEditor)
+                            it.route == screen.route
                         } == true
                         
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = stringResource(screen.titleRes)) },
                             label = null,
                             selected = selected,
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                                selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 if (selected) {
-                                    // If already on this tab (or sub-screen), pop to its root
                                     navController.popBackStack(screen.route, inclusive = false)
                                 } else {
                                     navController.navigate(screen.route) {

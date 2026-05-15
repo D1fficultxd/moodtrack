@@ -1,50 +1,63 @@
 package com.d1ff.moodtrack
 
 import android.os.Bundle
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.d1ff.moodtrack.ui.MainScreen
 import com.d1ff.moodtrack.ui.theme.Typography
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        )
         super.onCreate(savedInstanceState)
         setContent {
             MoodtrackTheme {
-                // Cheerful Background
-                val gradient = if (isSystemInDarkTheme()) {
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceContainerHigh
+                val colorScheme = MaterialTheme.colorScheme
+                val darkTheme = isSystemInDarkTheme()
+                val gradient = remember(colorScheme, darkTheme) {
+                    if (darkTheme) {
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                colorScheme.surface,
+                                colorScheme.primaryContainer.copy(alpha = 0.10f),
+                                colorScheme.surfaceContainer
+                            )
                         )
-                    )
-                } else {
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color(0xFFFFFBFE),
-                            Color(0xFFF3E5F5) // Subtle Lavender/Pink
+                    } else {
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                colorScheme.surface,
+                                colorScheme.primaryContainer.copy(alpha = 0.18f),
+                                colorScheme.surfaceContainerLow
+                            )
                         )
-                    )
+                    }
                 }
-                
+
                 Box(modifier = Modifier.fillMaxSize().background(gradient)) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
@@ -85,6 +98,14 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = Color(0xFFE6E1E5),
 )
 
+private val MoodShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(18.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(32.dp)
+)
+
 @Composable
 fun MoodtrackTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
@@ -103,6 +124,7 @@ fun MoodtrackTheme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
+        shapes = MoodShapes,
         content = content
     )
 }

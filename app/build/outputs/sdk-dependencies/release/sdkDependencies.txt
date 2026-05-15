@@ -10,6 +10,9 @@ library {
   digests {
     sha256: "j\276\024l\'\206A8\270t\314\314\376_SN>\271#\311\232\033{]EIN\345iO>\n"
   }
+  repo_index {
+    value: 1
+  }
 }
 library {
   maven_library {
@@ -19,6 +22,9 @@ library {
   }
   digests {
     sha256: "{\017\031r@\202\313\374\274f\345\253\352+\233\311,\360\212\036\241\036\031\0313\355C\200\036\263\315\005"
+  }
+  repo_index {
+    value: 1
   }
 }
 library {
@@ -30,6 +36,9 @@ library {
   digests {
     sha256: "A\230\260\352\360\220\244\362[o~ZYX\037C\024\272\214\237l\321\321>\351\323H\346^\330\367\a"
   }
+  repo_index {
+    value: 1
+  }
 }
 library {
   maven_library {
@@ -40,12 +49,18 @@ library {
   digests {
     sha256: "\005_\\\262B\207\372\020a\000\231Z{G\253\222\022k\201\3502\350u\365\372,\360\275Ui=\v"
   }
+  repo_index {
+    value: 1
+  }
 }
 library {
   maven_library {
     groupId: "org.jetbrains.kotlin"
     artifactId: "kotlin-stdlib-common"
     version: "1.9.22"
+  }
+  repo_index {
+    value: 1
   }
 }
 library {
@@ -57,12 +72,16 @@ library {
   digests {
     sha256: "\225\263\355\257x\"{|\310\330\002\321\037\207\223\251\256\322\222\345+\217\277\214\b\326\023L\313\027\026\323"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.annotation"
     artifactId: "annotation"
     version: "1.7.0"
+  }
+  repo_index {
   }
 }
 library {
@@ -74,6 +93,8 @@ library {
   digests {
     sha256: "\343k\216K\203\223\244\255\307N=J\262*\325\243c\226\360\316\242\344\vW4\352\341I7\337\322$"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -83,6 +104,8 @@ library {
   }
   digests {
     sha256: "B\377\247\312G\327\272\217\341\330t\305~\371\307\021\033\304\032+\f\f!Q\2129\340}\"-\355\213"
+  }
+  repo_index {
   }
 }
 library {
@@ -94,12 +117,16 @@ library {
   digests {
     sha256: "\306\353~g`\021\354e\263$(7=E\r\353\337\304Qy\304\370\263\247R\027O\270|\027\260\212"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.collection"
     artifactId: "collection"
     version: "1.4.0"
+  }
+  repo_index {
   }
 }
 library {
@@ -111,6 +138,8 @@ library {
   digests {
     sha256: "\325\317{rd|y\225\a\025\210\376\207\004P\377\234\217\022\177%=-HQ\341a\270\000\366z\340"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -120,6 +149,8 @@ library {
   }
   digests {
     sha256: "\306\336\255\242\372\305;\216\246R=\275\247u\227\261(\000ftao\024\017\004\337#&Lm\032\243"
+  }
+  repo_index {
   }
 }
 library {
@@ -131,6 +162,8 @@ library {
   digests {
     sha256: "\f\340g\305\024\240\321\004\235\033\353\337p\2364N\323&o\351tBuh)7\315\313\0233N\236"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -140,6 +173,9 @@ library {
   }
   digests {
     sha256: "\344\255v\a\345\300G|o\211\016\362jI\313\215\033\264\337\373e\v\253E\002\257\356ddN0i"
+  }
+  repo_index {
+    value: 1
   }
 }
 library {
@@ -151,6 +187,8 @@ library {
   digests {
     sha256: "3\03115\246O\342\037\242\303^\354f\210\361\247nQ&\006\300\374\203\334\033h\2367\255\327s*"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -160,6 +198,8 @@ library {
   }
   digests {
     sha256: "\201\306\373\035\273j<\327\334\202}{\b\341\310\024.\323\244\000\243B$A\020\204\200\342/\2117\304"
+  }
+  repo_index {
   }
 }
 library {
@@ -171,6 +211,8 @@ library {
   digests {
     sha256: "e0\212\006\261\300\016\341\206\313\236\0312\023\203\360C\271\223\201?\025\"\304\177J>3\003\275\272A"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -180,6 +222,8 @@ library {
   }
   digests {
     sha256: "\241\276^\f\252+\ab8b\257j\342\033:\260q\201#$Q\204\320\343\r\352\201\265?\231\nG"
+  }
+  repo_index {
   }
 }
 library {
@@ -191,6 +235,8 @@ library {
   digests {
     sha256: "S=\355\216\340dZ\030\366e=\245?\341\354Z\025C\016\1776\2477\324^A\0051\363\0173\030"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -201,12 +247,18 @@ library {
   digests {
     sha256: "\020s\023v\f\030\370\332\027N\215\201\003PJF\216\200n\210\367\265Z\204\275\034\016\256\352\021\216\232"
   }
+  repo_index {
+    value: 1
+  }
 }
 library {
   maven_library {
     groupId: "org.jetbrains.kotlinx"
     artifactId: "kotlinx-coroutines-core"
     version: "1.7.1"
+  }
+  repo_index {
+    value: 1
   }
 }
 library {
@@ -218,12 +270,18 @@ library {
   digests {
     sha256: "t\226\317\375\323\353\020\020\232\315\332\0342\022\366\254x\025x\236\t8\r\311\342\314\336\304\226\333\243\374"
   }
+  repo_index {
+    value: 1
+  }
 }
 library {
   maven_library {
     groupId: "org.jetbrains.kotlinx"
     artifactId: "kotlinx-coroutines-bom"
     version: "1.7.1"
+  }
+  repo_index {
+    value: 1
   }
 }
 library {
@@ -235,6 +293,8 @@ library {
   digests {
     sha256: "\306\336\255\242\372\305;\216\246R=\275\247u\227\261(\000ftao\024\017\004\337#&Lm\032\243"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -244,6 +304,8 @@ library {
   }
   digests {
     sha256: "\232\377\242La`\334\214\255\252\311B-OqNP\tS}\002C\257\304\274t\265\267\317\r\344\255"
+  }
+  repo_index {
   }
 }
 library {
@@ -255,6 +317,8 @@ library {
   digests {
     sha256: "\257\216\021\270~\003\rn1\a\3559\255\317\001\372\020\326%\236\261\\C\313\246\347\264\343\377\256\337\'"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -264,6 +328,8 @@ library {
   }
   digests {
     sha256: "\357p3\261]\262uiw\034<\n\353o\2229+VT!a\225\376t\023n\243\341\b\221*\324"
+  }
+  repo_index {
   }
 }
 library {
@@ -275,6 +341,8 @@ library {
   digests {
     sha256: "N\035\222\342\211\222\f\327\265\0166q\271\031\033\324\023@sI\315\246\366\002\260(Td\364\034\034\202"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -285,12 +353,16 @@ library {
   digests {
     sha256: "v@;\261Y\237n*\334\233\2007.\373&t\270\313\355\342\260\361\346\350\\J\224\341\f{\224\260"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.runtime"
     artifactId: "runtime"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -302,12 +374,16 @@ library {
   digests {
     sha256: "6\207\270\210H^\255\023\030\321\027\023\374\325\357gJ\254\251m\305)\271\231\0200\273\356\302S\221#"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.runtime"
     artifactId: "runtime-saveable"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -319,12 +395,16 @@ library {
   digests {
     sha256: "m\242\032\325\002\322\030h\304\270I\f\250\345\020\230w\\\233\2429}\211mrNxi\276\320\260;"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -336,6 +416,8 @@ library {
   digests {
     sha256: "\273\365C\036\177\204\344\203E=\253\265\246\315]\030\365SP-\245/\f\213\351\252\225U6\300\035\016"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -345,6 +427,8 @@ library {
   }
   digests {
     sha256: "\\x(=\031V\261K\"\317j\327\fq*s\252\bA\026\267SU&\027l;\205\346\251 Z"
+  }
+  repo_index {
   }
 }
 library {
@@ -356,6 +440,8 @@ library {
   digests {
     sha256: "\354\301\031&%0\246\342\371\363s ~G-Gc\006\276\323\324\262\026\376a\261\352B\343\276\366\210"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -365,6 +451,8 @@ library {
   }
   digests {
     sha256: "W\305x\206.!\2366\fiW\377\v\312o\026\227\a\261\345X-O\245\223\342\204\367\366>3\366"
+  }
+  repo_index {
   }
 }
 library {
@@ -376,6 +464,8 @@ library {
   digests {
     sha256: "!\247\324\274\366\275\271J\327\271(8\001R\223\000\264\373\270\200\214\244\361\221\340\315\316o\330\344pZ"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -385,6 +475,8 @@ library {
   }
   digests {
     sha256: "\205S\370~q6\302N\305$5`\364\217\0342\313\245m\252wr/\211X\232\\\257\313\217x\224"
+  }
+  repo_index {
   }
 }
 library {
@@ -396,6 +488,8 @@ library {
   digests {
     sha256: "\343\033\320\351+\320\263\0336\004H\312Z[\200\374\037cP{\264\356\216\233\323\000CtI\321x\233"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -405,6 +499,8 @@ library {
   }
   digests {
     sha256: "\251\177L!\221\353\3352\371\232\302)Y{\321\251$F\260\034\321\240\210\3214\224\314\005\312\277\r\357"
+  }
+  repo_index {
   }
 }
 library {
@@ -416,6 +512,8 @@ library {
   digests {
     sha256: "\264\222\333\374\205\222dq6q\022\366\320\345\322\311\231\036\205\\T!\25379\223\226\314\001#\342\257"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -425,6 +523,8 @@ library {
   }
   digests {
     sha256: "o\263=\224s\244\223=\251\331\212\v\022\266\006\022~\200h\033\331\271\003\t\314\322\302#\bc\2719"
+  }
+  repo_index {
   }
 }
 library {
@@ -436,6 +536,8 @@ library {
   digests {
     sha256: "\340\2462\2327\022b\376LE\003r\267\017\332\363;v\236\366\221p\224r7\207\317\316\211k\035\323"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -445,6 +547,8 @@ library {
   }
   digests {
     sha256: "\a\270\266\023\226e\270\204\241b\354\317\227\211\034\245\017\177V\203\0223\277%\026\212\340O{V\206\022"
+  }
+  repo_index {
   }
 }
 library {
@@ -456,6 +560,8 @@ library {
   digests {
     sha256: "4\350\262\277\307N#\301R^=\251\003\256D\233\177\033D\n\357E\341\201Y\356G\016\221\231\177H"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -465,6 +571,8 @@ library {
   }
   digests {
     sha256: "Zg\351\204\361N\322\257\305\205\252:#\355\377\034\027\221\310\f\252+\366\212\017y\234\033\021\243\2208"
+  }
+  repo_index {
   }
 }
 library {
@@ -476,12 +584,16 @@ library {
   digests {
     sha256: "\311F\217V\340P\006\352\025\032BlT\225|\320y\233\213\203\245y\322\204m\322 a\363>^\315"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui-geometry"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -493,12 +605,16 @@ library {
   digests {
     sha256: "\257\330\273\265Xy\343\347]\353\030\235\331\rU\001\347YHqR\351\v\3648\372\256\273\000\341\350\252"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui-util"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -510,12 +626,16 @@ library {
   digests {
     sha256: "_\310\r\263\023\016\3756\204\235\244\266\305\314Q\004\235`\006\205k,\230\365\263q\032\377C<H\300"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui-graphics"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -527,12 +647,16 @@ library {
   digests {
     sha256: "&|Ko\200\330s\"\357\bXSX\335\377z57C\363\033\314\215\361PV\267i\262%\036#"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui-unit"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -544,12 +668,16 @@ library {
   digests {
     sha256: "]z\237\277\212\177vX\342\336o\020\267\210\177\363\326\3265\373sa/\b\211n\240S\341\220J\200"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui-text"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -561,6 +689,8 @@ library {
   digests {
     sha256: "\275\n\240\217MT%\266nx\320\311\vj\375+\031\223T\002\315W\207\345\367\241>D6G\020\315"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -570,6 +700,8 @@ library {
   }
   digests {
     sha256: "+\3628\030\262:\231m\332\241\265\375[\263!)\332\377k\273-\316\025\026n/\314\335 \020\261\245"
+  }
+  repo_index {
   }
 }
 library {
@@ -581,12 +713,16 @@ library {
   digests {
     sha256: "\232\023Q)ZOs\235\360\357\3504J\332\251\257\263HV\303\257XMJ\232\373\354\020ZE\271\v"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.ui"
     artifactId: "ui-tooling-preview"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -598,6 +734,8 @@ library {
   digests {
     sha256: "\037BM\v\332\3331\241\035\342\026c\205]3\250\204\206/]\207?[vW\034\243\332(\277[\245"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -608,12 +746,16 @@ library {
   digests {
     sha256: "5\204\020/\304\233\363\231\305n;{\344\277\341 \000\304a\0222\f\330\317\205\314\n\217\223\363\347R"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.foundation"
     artifactId: "foundation"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -625,12 +767,16 @@ library {
   digests {
     sha256: "\037\320\341\234\363%/\363t/3\264#\261\016yx\355\272\333\271wr\275\034\366\033\206E\fN\217"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.animation"
     artifactId: "animation"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -642,12 +788,16 @@ library {
   digests {
     sha256: "\a\243R\\j\327\334s\211\245\341\347B\361\351\211+\303\255As8\325\255^\267c\250\367\246\036\n"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.animation"
     artifactId: "animation-core"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -659,12 +809,16 @@ library {
   digests {
     sha256: "@2\223h\205Dd\263\333\245\323\222\217\213\2756PA\206>\205\024\231\257\310\307U\224d\276\376^"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.foundation"
     artifactId: "foundation-layout"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -676,6 +830,8 @@ library {
   digests {
     sha256: "\365}H\212\361\207\025j\336Q\301\0177\355x\245dyR]\235rr\027\023\245\304\024\3254\372\353"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -685,6 +841,8 @@ library {
   }
   digests {
     sha256: "W\350\3312`\321\215[\220\a\311\356\323\306J\321Y\336\220\310`\236\277\307J4|\275QE5\244"
+  }
+  repo_index {
   }
 }
 library {
@@ -696,6 +854,8 @@ library {
   digests {
     sha256: "~\245W;\223\253\253\323\27521$Q\306\352H\246b\260:\024\r\332\201\256\276uwj \244\""
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -705,6 +865,8 @@ library {
   }
   digests {
     sha256: "\333\221]\277I5xc\336\026i\377\237\335\216\220\b\326_\343W\257l\316\232\3460C\255_f\027"
+  }
+  repo_index {
   }
 }
 library {
@@ -716,6 +878,8 @@ library {
   digests {
     sha256: "F\375c:\300\033I\267\374\253\302c\277\t\214Z\213\236\232iwM#N\334\312\004\373\002\337\216&"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -725,6 +889,8 @@ library {
   }
   digests {
     sha256: "v\332,P#q\331\303\200T\337^+$\215\000\332\207\200\236\320X\3636>\256\207\316^$\003\370"
+  }
+  repo_index {
   }
 }
 library {
@@ -736,6 +902,8 @@ library {
   digests {
     sha256: "\250\034\217\347\210\025\372G\337[t\235\353Rrz\321\037\223\227\332X\261`\027\364\353,\021\342\205d"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -745,6 +913,8 @@ library {
   }
   digests {
     sha256: "\224\002D,\334ZC\317b\373\024\370\317\230\3063B\324\331\331\270\005\310\003<l\367\350\002t\232\301"
+  }
+  repo_index {
   }
 }
 library {
@@ -756,6 +926,8 @@ library {
   digests {
     sha256: " \345\270\366Rj4YZ`OVq\215\250\021g\300\264\nz\224\245}\2525Vc\362YM\362"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -765,6 +937,8 @@ library {
   }
   digests {
     sha256: "\022\360\203\033O\b\t-]\332\',\031#\301\032\002/\362\f\357\376\323\350\001u\036!\273\215\034\036"
+  }
+  repo_index {
   }
 }
 library {
@@ -776,6 +950,8 @@ library {
   digests {
     sha256: "\024z\364\341J\031\204\001\r\217\025^^\031\327\201\360<\035p\337\355\002\250\340\321\204(\270\374\206\202"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -785,6 +961,8 @@ library {
   }
   digests {
     sha256: "\021\3675\313;U\304X\324p\276\331\342RT7[Q\213K\033\255i&x:p&\333\017P%"
+  }
+  repo_index {
   }
 }
 library {
@@ -796,6 +974,8 @@ library {
   digests {
     sha256: "\214\377\207\016\306\3731\333H\245/Jy#5\264\277\215\340~\003\2757\2021\201Rd3\314\325\313"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -803,12 +983,16 @@ library {
     artifactId: "compose-bom"
     version: "2024.02.00"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.material"
     artifactId: "material-icons-extended"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -820,12 +1004,16 @@ library {
   digests {
     sha256: "\335\3557\212\220\360V \264=\214T\273I\202A)\356\220\266\377\213\006\276(\236\234\374\273\343\177\251"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.material"
     artifactId: "material-icons-core"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -837,12 +1025,16 @@ library {
   digests {
     sha256: "c\260\023~\306h\267\324\357\372>\203\360\300\316\246\202\227\363i\300\022\256\354\004\350\v\345K\302RG"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.material"
     artifactId: "material-ripple"
     version: "1.6.1"
+  }
+  repo_index {
   }
 }
 library {
@@ -854,12 +1046,16 @@ library {
   digests {
     sha256: "\305\273\251\035\254\037\346jO\226c\v\003\314\370\210\361\\Z\373\376d\037\033\322\304f\334\213\025s^"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
     groupId: "androidx.compose.material3"
     artifactId: "material3"
     version: "1.2.0"
+  }
+  repo_index {
   }
 }
 library {
@@ -871,6 +1067,8 @@ library {
   digests {
     sha256: "\020\372\315\350\366o\221\326\032H\310\337\354\343\264\223\3260\202/1\034\322\006C\2424\026\344\361\352\f"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -880,6 +1078,8 @@ library {
   }
   digests {
     sha256: "\365\005\256\351\212\372$\372\253\243n\n\242\370\313\351\267\245\200\b\272*\003(j\vz\036h\356\'\177"
+  }
+  repo_index {
   }
 }
 library {
@@ -891,6 +1091,8 @@ library {
   digests {
     sha256: "\255@\304\255\256\204\200v\376\364\033tt\231\241\005\017ERS\234\017B\267Ge\344:w\336\256\332"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -900,6 +1102,8 @@ library {
   }
   digests {
     sha256: "\205\233\374\222\3316\373\257\207\027?W\265\271\030\305R\372\335\\Z\223\036\376\026\327\216\232\330e\266\267"
+  }
+  repo_index {
   }
 }
 library {
@@ -911,6 +1115,8 @@ library {
   digests {
     sha256: "9\331\275;\370\201\205\272\327\212\256\320\035\210\223\363u\334\237\016i\236P\227\377dA\242\335\212\257)"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -920,6 +1126,8 @@ library {
   }
   digests {
     sha256: "\v^\aR\207 :6\364j\373L\355\243\226Gh\242x\311\263gh\344\270\313\262\224\357\001\324\364"
+  }
+  repo_index {
   }
 }
 library {
@@ -931,6 +1139,8 @@ library {
   digests {
     sha256: "ibO\327\255\326\316[\374\301#b\315BsA\322\221\016\'~\325\246\374\304a2\244\211\221\024\320"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -940,6 +1150,8 @@ library {
   }
   digests {
     sha256: "\2312m>\354\244\246Fq\274\210\002\361\344_Nk4\216\214\177\253\2420\303\205M1h\t\377\317"
+  }
+  repo_index {
   }
 }
 library {
@@ -951,6 +1163,8 @@ library {
   digests {
     sha256: "\332L\f\272~\374\257\242\237\276\253\035\264\031\204#\217%\301\2436\022\301\326\rc\271\225\226\215p\312"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -960,6 +1174,8 @@ library {
   }
   digests {
     sha256: "\273\177\241\023\021/~HWIn\".0Q\327:\221\n\335t\277@v\036\033\332\345[\002\026\257"
+  }
+  repo_index {
   }
 }
 library {
@@ -971,6 +1187,8 @@ library {
   digests {
     sha256: "\312nP3\"\262\346\003t\302\263l\225\305\v\026p\235\223\210\3766\350\017\262=\341\373\367\246\353\225"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -980,6 +1198,8 @@ library {
   }
   digests {
     sha256: "o\232\307 \202\272\333wdG\315\325y\301l%\301\201\'\030\\k\251\362\317\253\222FG>-\261"
+  }
+  repo_index {
   }
 }
 library {
@@ -991,6 +1211,8 @@ library {
   digests {
     sha256: "(\376\242\2156[J\357M^\2072\376Q\3623\345\200\322\004,\324\247\nk):Q\215\256\307\003"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -1000,6 +1222,8 @@ library {
   }
   digests {
     sha256: "\310\020PUB\000\025\223\aQ\2315[\031\331\213\205^\3346\331W[\327d\030\003!\342\n\222\274"
+  }
+  repo_index {
   }
 }
 library {
@@ -1011,6 +1235,60 @@ library {
   digests {
     sha256: "\255T\3363J\320\364\245:[\244\030v\371\026\2041\232\214\3639c\025\267g\265\021\002\244\023\213\321"
   }
+  repo_index {
+  }
+}
+library {
+  maven_library {
+    groupId: "com.tom-roush"
+    artifactId: "pdfbox-android"
+    version: "2.0.27.0"
+  }
+  digests {
+    sha256: "0\'\177\207\234\375W\035\262\2417X,\225Qj\rN\246w\216\224U\031\274X\312\223\325}\210\307"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "org.bouncycastle"
+    artifactId: "bcprov-jdk15to18"
+    version: "1.72"
+  }
+  digests {
+    sha256: "\352f\352\212E\b\020\262\031>\213\371\247\255>F0|\230\226\"L\017@}\033}\226\272\022!\314"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "org.bouncycastle"
+    artifactId: "bcpkix-jdk15to18"
+    version: "1.72"
+  }
+  digests {
+    sha256: "\331\271tw\267$\231\274\356\002\365\251\006Q\b\020%\177\363j\224\277i\373\312\v\036e\347\377\333n"
+  }
+  repo_index {
+    value: 1
+  }
+}
+library {
+  maven_library {
+    groupId: "org.bouncycastle"
+    artifactId: "bcutil-jdk15to18"
+    version: "1.72"
+  }
+  digests {
+    sha256: "\331!\204\275\3531\005\241\032\331\343j\313\326k_\216\355\t\033\b\271\310\363\342T\236B\267\3611\361"
+  }
+  repo_index {
+    value: 1
+  }
 }
 library {
   maven_library {
@@ -1021,6 +1299,8 @@ library {
   digests {
     sha256: "</\232\nQ\202o\033\247Gu\035\211\235\230W\336\371\227l\t\370\352\220\006k6J\274\262J\031"
   }
+  repo_index {
+  }
 }
 library {
   maven_library {
@@ -1030,6 +1310,8 @@ library {
   }
   digests {
     sha256: "\213\205\363\212\250&\331\002\350\250\215*\371\334s\245\364?f\030r\004\205\361nt&\222\305\241\217o"
+  }
+  repo_index {
   }
 }
 library_dependencies {
@@ -2043,10 +2325,25 @@ library_dependencies {
 library_dependencies {
   library_index: 108
   library_dep_index: 109
+  library_dep_index: 110
+  library_dep_index: 111
+}
+library_dependencies {
+  library_index: 110
+  library_dep_index: 109
+  library_dep_index: 111
+}
+library_dependencies {
+  library_index: 111
   library_dep_index: 109
 }
 library_dependencies {
-  library_index: 109
+  library_index: 112
+  library_dep_index: 113
+  library_dep_index: 113
+}
+library_dependencies {
+  library_index: 113
   library_dep_index: 9
   library_dep_index: 8
   library_dep_index: 25
@@ -2057,7 +2354,7 @@ library_dependencies {
   library_dep_index: 14
   library_dep_index: 0
   library_dep_index: 20
-  library_dep_index: 108
+  library_dep_index: 112
 }
 module_dependencies {
   module_name: "base"
@@ -2077,6 +2374,7 @@ module_dependencies {
   dependency_index: 101
   dependency_index: 104
   dependency_index: 108
+  dependency_index: 112
 }
 repositories {
   maven_repo {

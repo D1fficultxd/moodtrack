@@ -22,8 +22,8 @@ interface DailyEntryDao {
     suspend fun update(entry: DailyEntry)
 
     @Query("DELETE FROM daily_entries WHERE id = :id")
-    suspend fun deleteById(id: Long)
+    suspend fun deleteById(id: Long): Int
     
     @Query("DELETE FROM daily_entries")
-    suspend fun deleteAll()
+    suspend fun deleteAll(): Int
 }

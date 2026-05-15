@@ -97,6 +97,7 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     
     val workVersion = "2.9.0"
     implementation("androidx.work:work-runtime-ktx:$workVersion")

@@ -1,12 +1,18 @@
 package com.d1ff.moodtrack.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
@@ -14,19 +20,25 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.d1ff.moodtrack.R
 import com.d1ff.moodtrack.data.SettingsRepository
 import com.d1ff.moodtrack.reminder.ReminderManager
+import com.d1ff.moodtrack.ui.components.ExpressiveSectionHeader
+import com.d1ff.moodtrack.ui.components.GlassCard
 import com.d1ff.moodtrack.viewmodel.MoodViewModel
+import com.d1ff.moodtrack.viewmodel.PdfImportState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,10 +56,47 @@ fun SettingsScreen(
     val reminderHour by settingsRepo.reminderHour.collectAsState(initial = 20)
     val reminderMinute by settingsRepo.reminderMinute.collectAsState(initial = 0)
     val language by settingsRepo.language.collectAsState(initial = "SYSTEM")
+    val pdfImportState by viewModel.pdfImportState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     var showTimePicker by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
-    var showLanguageMenu by remember { mutableStateOf(false) }
+    var showLanguageSheet by remember { mutableStateOf(false) }
+    var pendingImportUri by remember { mutableStateOf<Uri?>(null) }
+    var showImportConfirm by remember { mutableStateOf(false) }
+
+    val importCompletedText = stringResource(R.string.import_completed)
+    val importAddedText = stringResource(R.string.import_result_added)
+    val importUpdatedText = stringResource(R.string.import_result_updated)
+    val importSkippedText = stringResource(R.string.import_result_skipped)
+    val importFailedText = stringResource(R.string.import_file_failed)
+    val importFormatNotRecognizedText = stringResource(R.string.import_format_not_recognized)
+
+    LaunchedEffect(pdfImportState) {
+        when (val state = pdfImportState) {
+            is PdfImportState.Completed -> {
+                snackbarHostState.showSnackbar(
+                    listOf(
+                        importCompletedText,
+                        "$importAddedText: ${state.result.addedEntries}",
+                        "$importUpdatedText: ${state.result.updatedEntries}",
+                        "$importSkippedText: ${state.result.skippedRows}"
+                    ).joinToString("\n")
+                )
+                viewModel.clearPdfImportState()
+            }
+            PdfImportState.FileError -> {
+                snackbarHostState.showSnackbar(importFailedText)
+                viewModel.clearPdfImportState()
+            }
+            PdfImportState.FormatNotRecognized -> {
+                snackbarHostState.showSnackbar(importFormatNotRecognizedText)
+                viewModel.clearPdfImportState()
+            }
+            PdfImportState.Idle,
+            PdfImportState.Loading -> Unit
+        }
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -60,184 +109,290 @@ fun SettingsScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.settings_title),
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        SectionCard(stringResource(R.string.guide_title), Icons.AutoMirrored.Filled.HelpOutline) {
-            OutlinedCard(
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onNavigateToGuide()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.large
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(stringResource(R.string.guide_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                }
+    val pdfPickerLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
+            pendingImportUri = uri
+            showImportConfirm = true
         }
+    }
 
-        SectionCard(stringResource(R.string.notifications), Icons.Default.Notifications) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.daily_reminder), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                Switch(
-                    checked = reminderEnabled,
-                    onCheckedChange = { enabled ->
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        if (enabled) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                                    coroutineScope.launch {
-                                        settingsRepo.setReminderEnabled(true)
-                                        ReminderManager.scheduleReminder(context, reminderHour, reminderMinute)
-                                    }
-                                } else {
-                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                            } else {
-                                coroutineScope.launch {
-                                    settingsRepo.setReminderEnabled(true)
-                                    ReminderManager.scheduleReminder(context, reminderHour, reminderMinute)
-                                }
-                            }
-                        } else {
-                            coroutineScope.launch {
-                                settingsRepo.setReminderEnabled(false)
-                                ReminderManager.cancelReminder(context)
-                            }
-                        }
-                    }
+    Scaffold(
+        containerColor = Color.Transparent,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { innerPadding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .statusBarsPadding(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item {
+                Text(
+                    text = stringResource(R.string.settings_title),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 32.sp,
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            
-            if (reminderEnabled) {
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedCard(
-                    onClick = { 
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        showTimePicker = true 
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large
+
+            item {
+                SettingsSectionCard(
+                    title = stringResource(R.string.guide_title),
+                    icon = Icons.AutoMirrored.Filled.HelpOutline
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    SettingsInnerBox(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onNavigateToGuide()
+                        }
                     ) {
-                        Icon(Icons.Default.AccessTime, contentDescription = null)
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(stringResource(R.string.reminder_time), style = MaterialTheme.typography.labelMedium)
-                            Text(
-                                text = String.format("%02d:%02d", reminderHour, reminderMinute),
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                            Spacer(Modifier.width(12.dp))
+                            Text(stringResource(R.string.guide_title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
                         }
                     }
                 }
             }
-        }
 
-        SectionCard(stringResource(R.string.language), Icons.Default.Language) {
-            Box {
-                OutlinedCard(
-                    onClick = { 
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        showLanguageMenu = true 
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.large
+            item {
+                SettingsSectionCard(
+                    title = stringResource(R.string.notifications),
+                    icon = Icons.Default.Notifications
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                     ) {
-                        Column {
+                        Text(
+                            stringResource(R.string.daily_reminder), 
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Switch(
+                            checked = reminderEnabled,
+                            onCheckedChange = { enabled ->
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (enabled) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                                            coroutineScope.launch {
+                                                settingsRepo.setReminderEnabled(true)
+                                                ReminderManager.scheduleReminder(context, reminderHour, reminderMinute)
+                                            }
+                                        } else {
+                                            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                        }
+                                    } else {
+                                        coroutineScope.launch {
+                                            settingsRepo.setReminderEnabled(true)
+                                            ReminderManager.scheduleReminder(context, reminderHour, reminderMinute)
+                                        }
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        settingsRepo.setReminderEnabled(false)
+                                        ReminderManager.cancelReminder(context)
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    AnimatedVisibility(visible = reminderEnabled) {
+                        SettingsInnerBox(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                showTimePicker = true
+                            }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Default.AccessTime, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                                Spacer(Modifier.width(12.dp))
+                                Column {
+                                    Text(
+                                        stringResource(R.string.reminder_time), 
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = String.format("%02d:%02d", reminderHour, reminderMinute),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = stringResource(R.string.settings_data),
+                    icon = Icons.Default.Storage
+                ) {
+                    SettingsInnerBox(
+                        onClick = {
+                            if (pdfImportState !is PdfImportState.Loading) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                pdfPickerLauncher.launch(arrayOf("application/pdf"))
+                            }
+                        }
+                    ) {
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    stringResource(R.string.import_data_title),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    stringResource(R.string.import_data_subtitle),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Default.UploadFile,
+                                    contentDescription = stringResource(R.string.import_data_content_description),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            trailingContent = {
+                                if (pdfImportState is PdfImportState.Loading) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                                }
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    FilledTonalButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showClearConfirm = true
+                        },
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(22.dp),
+                        contentPadding = PaddingValues(14.dp)
+                    ) {
+                        Icon(Icons.Default.DeleteForever, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.delete_all_data), fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = stringResource(R.string.language),
+                    icon = Icons.Default.Language
+                ) {
+                    SettingsInnerBox(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            showLanguageSheet = true
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             val langText = when(language) {
                                 "RU" -> stringResource(R.string.lang_ru)
                                 "EN" -> stringResource(R.string.lang_en)
                                 else -> stringResource(R.string.lang_system)
                             }
-                            Text(langText, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            Text(
+                                text = langText,
+                                modifier = Modifier.weight(1f),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ExpandMore,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
-                
-                DropdownMenu(expanded = showLanguageMenu, onDismissRequest = { showLanguageMenu = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.lang_system)) },
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = stringResource(R.string.support_author),
+                    icon = Icons.Default.Favorite
+                ) {
+                    SettingsInnerBox(
                         onClick = {
-                            coroutineScope.launch {
-                                settingsRepo.setLanguage("SYSTEM")
-                                AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
-                            }
-                            showLanguageMenu = false
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://boosty.to/d1fficultxd"))
+                            context.startActivity(intent)
                         }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.lang_ru)) },
-                        onClick = {
-                            coroutineScope.launch {
-                                settingsRepo.setLanguage("RU")
-                                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.VolunteerActivism, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    stringResource(R.string.support_author), 
+                                    style = MaterialTheme.typography.bodyLarge, 
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    stringResource(R.string.support_author_subtitle), 
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
-                            showLanguageMenu = false
                         }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.lang_en)) },
-                        onClick = {
-                            coroutineScope.launch {
-                                settingsRepo.setLanguage("EN")
-                                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
-                            }
-                            showLanguageMenu = false
-                        }
-                    )
+                    }
                 }
             }
+
+            item {
+                Text(
+                    text = stringResource(R.string.disclaimer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 32.dp)
+                )
+            }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        Button(
-            onClick = { 
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                showClearConfirm = true 
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.large
-        ) {
-            Icon(Icons.Default.DeleteForever, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(stringResource(R.string.delete_all_data))
-        }
-
-        Text(
-            text = stringResource(R.string.disclaimer),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 
     if (showTimePicker) {
@@ -246,12 +401,28 @@ fun SettingsScreen(
             initialMinute = reminderMinute,
             is24Hour = true
         )
+        var lastHapticHour by remember { mutableIntStateOf(timePickerState.hour) }
+        var lastHapticMinute by remember { mutableIntStateOf(timePickerState.minute) }
+
+        LaunchedEffect(timePickerState.hour) {
+            if (lastHapticHour != timePickerState.hour) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                lastHapticHour = timePickerState.hour
+            }
+        }
+
+        LaunchedEffect(timePickerState.minute) {
+            if (lastHapticMinute != timePickerState.minute) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                lastHapticMinute = timePickerState.minute
+            }
+        }
         
         AlertDialog(
             onDismissRequest = { showTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     coroutineScope.launch {
                         settingsRepo.setReminderTime(timePickerState.hour, timePickerState.minute)
                         if (reminderEnabled) {
@@ -259,7 +430,7 @@ fun SettingsScreen(
                         }
                     }
                     showTimePicker = false
-                }) { Text("ОК") }
+                }) { Text(stringResource(R.string.ok)) }
             },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) { Text(stringResource(R.string.cancel)) }
@@ -267,6 +438,94 @@ fun SettingsScreen(
             text = {
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     TimePicker(state = timePickerState)
+                }
+            }
+        )
+    }
+
+    if (showLanguageSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showLanguageSheet = false },
+            shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.language),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                LanguageOptionRow(
+                    text = stringResource(R.string.lang_system),
+                    selected = language == "SYSTEM",
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        coroutineScope.launch {
+                            settingsRepo.setLanguage("SYSTEM")
+                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+                        }
+                        showLanguageSheet = false
+                    }
+                )
+                LanguageOptionRow(
+                    text = stringResource(R.string.lang_ru),
+                    selected = language == "RU",
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        coroutineScope.launch {
+                            settingsRepo.setLanguage("RU")
+                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ru"))
+                        }
+                        showLanguageSheet = false
+                    }
+                )
+                LanguageOptionRow(
+                    text = stringResource(R.string.lang_en),
+                    selected = language == "EN",
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        coroutineScope.launch {
+                            settingsRepo.setLanguage("EN")
+                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+                        }
+                        showLanguageSheet = false
+                    }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    }
+
+    if (showImportConfirm) {
+        AlertDialog(
+            onDismissRequest = {
+                showImportConfirm = false
+                pendingImportUri = null
+            },
+            title = { Text(stringResource(R.string.import_confirm_title)) },
+            text = { Text(stringResource(R.string.import_confirm_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    pendingImportUri?.let { viewModel.importEntriesFromPdf(it) }
+                    showImportConfirm = false
+                    pendingImportUri = null
+                }) {
+                    Text(stringResource(R.string.import_action))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showImportConfirm = false
+                    pendingImportUri = null
+                }) {
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -292,5 +551,83 @@ fun SettingsScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun SettingsSectionCard(
+    title: String,
+    icon: ImageVector,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(18.dp)) {
+            ExpressiveSectionHeader(title = title, icon = icon)
+            Spacer(modifier = Modifier.height(16.dp))
+            content()
+        }
+    }
+}
+
+@Composable
+fun SettingsInnerBox(
+    onClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f))
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun LanguageOptionRow(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.secondaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceContainer
+        },
+        contentColor = if (selected) {
+            MaterialTheme.colorScheme.onSecondaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        border = BorderStroke(
+            1.dp,
+            if (selected) {
+                MaterialTheme.colorScheme.secondary.copy(alpha = 0.30f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f)
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = text,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+            )
+            if (selected) {
+                Icon(Icons.Default.Check, contentDescription = null)
+            }
+        }
     }
 }
