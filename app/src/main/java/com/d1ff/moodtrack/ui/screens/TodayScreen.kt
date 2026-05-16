@@ -1,12 +1,12 @@
 package com.d1ff.moodtrack.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
@@ -26,9 +26,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.d1ff.moodtrack.R
 import com.d1ff.moodtrack.data.DailyEntry
+import com.d1ff.moodtrack.data.SettingsRepository
+import com.d1ff.moodtrack.health.HealthConnectAvailability
+import com.d1ff.moodtrack.health.HealthConnectSleepManager
+import com.d1ff.moodtrack.health.SleepImportResult
 import com.d1ff.moodtrack.ui.components.ExpressiveSectionHeader
 import com.d1ff.moodtrack.ui.components.GlassCard
 import com.d1ff.moodtrack.ui.components.MetricLabelWithHelp
@@ -38,6 +43,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.math.abs
 
 enum class SaveStatus {
     IDLE, SAVING, SAVED, ERROR
@@ -56,11 +63,17 @@ fun TodayScreen(
     val entriesByDate = remember(entries) { entries.associateBy { it.date } }
     val entryForDate = remember(entriesByDate, dateToLoad) { entriesByDate[dateToLoad] }
     
-    val scrollState = rememberScrollState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
+    val settingsRepository = remember { SettingsRepository(context) }
+    val healthAutoFill by settingsRepository.healthConnectAutoFill.collectAsState(initial = false)
+    val healthAskBeforeReplace by settingsRepository.healthConnectAskBeforeReplace.collectAsState(initial = true)
+    val healthSleepManager = remember { HealthConnectSleepManager(context) }
+    var healthRefreshTick by remember { mutableIntStateOf(0) }
+    var pendingHealthSleep by remember(dateToLoad) { mutableStateOf<SleepImportResult.Success?>(null) }
+    var healthSleepMessage by remember(dateToLoad) { mutableStateOf<String?>(null) }
 
     // Metrics State
     var sleepHours by remember(entryForDate, dateToLoad) { mutableFloatStateOf(entryForDate?.sleepHours ?: 8f) }
@@ -152,6 +165,53 @@ fun TodayScreen(
         }
     }
 
+    LaunchedEffect(
+        dateToLoad,
+        healthAutoFill,
+        healthAskBeforeReplace,
+        entryForDate?.id,
+        healthRefreshTick
+    ) {
+        pendingHealthSleep = null
+        healthSleepMessage = null
+        if (!healthAutoFill) return@LaunchedEffect
+
+        when (val result = healthSleepManager.readSleepHours(parsedDate)) {
+            is SleepImportResult.Success -> {
+                val existingSleep = entryForDate?.sleepHours
+                val shouldApplyAutomatically = entryForDate == null ||
+                    existingSleep == null ||
+                    existingSleep <= 0f ||
+                    !healthAskBeforeReplace
+
+                if (shouldApplyAutomatically) {
+                    if (abs(sleepHours - result.hours) >= 0.25f) {
+                        sleepHours = result.hours
+                        snackbarHostState.showSnackbar(context.getString(R.string.health_connect_sleep_filled))
+                    }
+                } else if (existingSleep != null && abs(existingSleep - result.hours) >= 0.25f) {
+                    pendingHealthSleep = result
+                }
+            }
+
+            SleepImportResult.NoPermission -> {
+                healthSleepMessage = context.getString(R.string.health_connect_no_sleep_permission)
+            }
+
+            SleepImportResult.NoData -> {
+                healthSleepMessage = context.getString(R.string.health_connect_no_sleep_data)
+            }
+
+            SleepImportResult.Unavailable -> {
+                healthSleepMessage = context.getString(R.string.health_connect_unavailable)
+            }
+
+            is SleepImportResult.Error -> {
+                healthSleepMessage = context.getString(R.string.health_connect_read_error)
+            }
+        }
+    }
+
     if (showHelpDialog) {
         ModalBottomSheet(
             onDismissRequest = { showHelpDialog = false },
@@ -202,6 +262,18 @@ fun TodayScreen(
         helpDialogTitle = context.getString(titleRes)
         helpDialogContent = contentResList.map { context.getString(it) }
         showHelpDialog = true
+    }
+
+    val healthPermissionLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract()
+    ) { grantedPermissions ->
+        if (grantedPermissions.contains(healthSleepManager.sleepPermission)) {
+            healthRefreshTick++
+        } else {
+            scope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.health_connect_no_sleep_permission))
+            }
+        }
     }
 
     val resetForm = {
@@ -314,32 +386,34 @@ fun TodayScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .then(if (onBack != null) Modifier.navigationBarsPadding() else Modifier)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
+                .padding(horizontal = 16.dp),
+            contentPadding = PaddingValues(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (isHighRisk) {
-                Card(
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.extraLarge
-                ) {
-                    Text(
-                        text = stringResource(R.string.risk_warning),
-                        modifier = Modifier.padding(16.dp),
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.extraLarge
+                    ) {
+                        Text(
+                            text = stringResource(R.string.risk_warning),
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
             }
 
-            SectionCard(stringResource(R.string.section_core_metrics), Icons.Default.Insights) {
+            item {
+                SectionCard(stringResource(R.string.section_core_metrics), Icons.Default.Insights) {
                 MetricSlider(
                     title = stringResource(R.string.sleep_hours_label), 
                     value = sleepHours, 
@@ -359,6 +433,61 @@ fun TodayScreen(
                         ))
                     }
                 )
+
+                pendingHealthSleep?.let { sleepResult ->
+                    HealthSleepSuggestionCard(
+                        message = stringResource(
+                            if (sleepResult.usedSessionFallback) {
+                                R.string.health_connect_sleep_period_found
+                            } else {
+                                R.string.health_connect_sleep_found
+                            },
+                            formatHealthSleepDuration(sleepResult.minutes)
+                        ),
+                        savedAs = stringResource(
+                            R.string.health_connect_sleep_will_save,
+                            formatHealthSleepHours(sleepResult.hours)
+                        ),
+                        caption = if (sleepResult.usedSessionFallback) {
+                            stringResource(R.string.health_connect_sleep_fallback_note)
+                        } else {
+                            null
+                        },
+                        onUse = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            sleepHours = sleepResult.hours
+                            pendingHealthSleep = null
+                            healthSleepMessage = null
+                            scope.launch {
+                                snackbarHostState.showSnackbar(context.getString(R.string.health_connect_sleep_filled))
+                            }
+                        },
+                        onKeepManual = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            pendingHealthSleep = null
+                        }
+                    )
+                }
+
+                if (pendingHealthSleep == null && healthSleepMessage != null) {
+                    HealthSleepStatusCard(
+                        message = healthSleepMessage.orEmpty(),
+                        actionText = if (healthSleepMessage == stringResource(R.string.health_connect_no_sleep_permission)) {
+                            stringResource(R.string.health_connect_connect)
+                        } else {
+                            null
+                        },
+                        onAction = {
+                            when (healthSleepManager.availability()) {
+                                HealthConnectAvailability.Available -> healthPermissionLauncher.launch(healthSleepManager.permissions)
+                                HealthConnectAvailability.InstallOrUpdateRequired -> {
+                                    runCatching { context.startActivity(healthSleepManager.installIntent()) }
+                                }
+                                HealthConnectAvailability.Unavailable -> Unit
+                            }
+                        }
+                    )
+                }
 
                 MetricSlider(
                     title = stringResource(R.string.mood_label), 
@@ -398,10 +527,12 @@ fun TodayScreen(
                         ))
                     }
                 )
+                }
             }
 
             // Expandable Sections
-            ExpandableSectionCard(
+            item {
+                ExpandableSectionCard(
                 title = stringResource(R.string.section_depressive_expand),
                 icon = Icons.Default.SentimentVeryDissatisfied,
                 expanded = depressiveExpanded,
@@ -409,7 +540,7 @@ fun TodayScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     depressiveExpanded = !depressiveExpanded
                 }
-            ) {
+                ) {
                 MetricSlider(
                     title = stringResource(R.string.apathy_label), 
                     value = apathy.toFloat(), 
@@ -482,9 +613,11 @@ fun TodayScreen(
                         ))
                     }
                 )
+                }
             }
 
-            ExpandableSectionCard(
+            item {
+                ExpandableSectionCard(
                 title = stringResource(R.string.section_racing_expand),
                 icon = Icons.Default.Bolt,
                 expanded = racingExpanded,
@@ -492,7 +625,7 @@ fun TodayScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     racingExpanded = !racingExpanded
                 }
-            ) {
+                ) {
                 MetricSlider(
                     title = stringResource(R.string.irritability_label), 
                     value = irritability.toFloat(), 
@@ -547,9 +680,11 @@ fun TodayScreen(
                         ))
                     }
                 )
+                }
             }
 
-            SectionCard(stringResource(R.string.section_risks), Icons.Default.Warning) {
+            item {
+                SectionCard(stringResource(R.string.section_risks), Icons.Default.Warning) {
                 MetricLabelWithHelp(
                     title = stringResource(R.string.suicidal_thoughts_label),
                     textStyle = MaterialTheme.typography.titleSmall,
@@ -604,9 +739,11 @@ fun TodayScreen(
                             ))
                     }
                 )
+                }
             }
 
-            SectionCard(stringResource(R.string.section_note), Icons.AutoMirrored.Filled.Note) {
+            item {
+                SectionCard(stringResource(R.string.section_note), Icons.AutoMirrored.Filled.Note) {
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
@@ -627,13 +764,16 @@ fun TodayScreen(
                         unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 )
+                }
             }
 
-            TodayActionButtons(
-                isExistingEntry = entryForDate != null,
-                onClear = { resetForm() },
-                onSave = { saveNow() }
-            )
+            item {
+                TodayActionButtons(
+                    isExistingEntry = entryForDate != null,
+                    onClear = { resetForm() },
+                    onSave = { saveNow() }
+                )
+            }
         }
     }
 }
@@ -779,6 +919,129 @@ private fun TodayActionButtons(
 }
 
 @Composable
+private fun HealthSleepSuggestionCard(
+    message: String,
+    savedAs: String,
+    caption: String?,
+    onUse: () -> Unit,
+    onKeepManual: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 2.dp, bottom = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.24f))
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(20.dp))
+                Text(
+                    text = message,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+            Text(
+                text = savedAs,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.82f)
+            )
+            if (caption != null) {
+                Text(
+                    text = caption,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.72f)
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onKeepManual) {
+                    Text(stringResource(R.string.health_connect_sleep_keep_manual))
+                }
+                FilledTonalButton(
+                    onClick = onUse,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(stringResource(R.string.health_connect_sleep_use))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HealthSleepStatusCard(
+    message: String,
+    actionText: String?,
+    onAction: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 2.dp, bottom = 8.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.24f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Icon(
+                Icons.Default.Sync,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
+            )
+            Text(
+                text = message,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            if (actionText != null) {
+                TextButton(onClick = onAction) {
+                    Text(actionText)
+                }
+            }
+        }
+    }
+}
+
+private fun formatHealthSleepDuration(minutes: Long): String {
+    val hours = minutes / 60
+    val restMinutes = minutes % 60
+    return if (Locale.getDefault().language == "ru") {
+        "${hours} ч ${restMinutes} мин"
+    } else {
+        "${hours} h ${restMinutes} min"
+    }
+}
+
+private fun formatHealthSleepHours(hours: Float): String {
+    val formatted = String.format(Locale.getDefault(), "%.1f", hours)
+    return if (Locale.getDefault().language == "ru") {
+        "$formatted ч"
+    } else {
+        "$formatted h"
+    }
+}
+
+@Composable
 fun SectionCard(title: String, icon: ImageVector, content: @Composable ColumnScope.() -> Unit) {
     GlassCard(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -864,17 +1127,5 @@ fun getSleepLabel(hours: Float): String {
         hours > 5f -> stringResource(R.string.label_sleep_risk)
         hours < 4f -> stringResource(R.string.label_sleep_racing_marker)
         else -> stringResource(R.string.label_sleep_red_flag)
-    }
-}
-
-@Composable
-fun getEaseLabel(value: Int): String {
-    return when (value) {
-        0 -> stringResource(R.string.guide_sleep_ease_0).split(" — ").last().lowercase()
-        1, 2 -> stringResource(R.string.guide_sleep_ease_1_2).split(" — ").last().lowercase()
-        3, 4 -> stringResource(R.string.guide_sleep_ease_3_4).split(" — ").last().lowercase()
-        5, 6 -> stringResource(R.string.guide_sleep_ease_5_6).split(" — ").last().lowercase()
-        7, 8 -> stringResource(R.string.guide_sleep_ease_7_8).split(" — ").last().lowercase()
-        else -> stringResource(R.string.guide_sleep_ease_9_10).split(" — ").last().lowercase()
     }
 }

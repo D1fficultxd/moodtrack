@@ -20,6 +20,8 @@ class SettingsRepository(private val context: Context) {
         val REMINDER_MINUTE = intPreferencesKey("reminder_minute")
         val THEME = stringPreferencesKey("theme") // SYSTEM, LIGHT, DARK
         val LANGUAGE = stringPreferencesKey("language") // SYSTEM, RU, EN
+        val HEALTH_CONNECT_AUTO_FILL = booleanPreferencesKey("health_connect_auto_fill")
+        val HEALTH_CONNECT_ASK_BEFORE_REPLACE = booleanPreferencesKey("health_connect_ask_before_replace")
     }
 
     val reminderEnabled: Flow<Boolean> = context.dataStore.data.map { it[REMINDER_ENABLED] ?: false }
@@ -27,6 +29,9 @@ class SettingsRepository(private val context: Context) {
     val reminderMinute: Flow<Int> = context.dataStore.data.map { it[REMINDER_MINUTE] ?: 0 }
     val theme: Flow<String> = context.dataStore.data.map { it[THEME] ?: "SYSTEM" }
     val language: Flow<String> = context.dataStore.data.map { it[LANGUAGE] ?: "SYSTEM" }
+    val healthConnectAutoFill: Flow<Boolean> = context.dataStore.data.map { it[HEALTH_CONNECT_AUTO_FILL] ?: false }
+    val healthConnectAskBeforeReplace: Flow<Boolean> =
+        context.dataStore.data.map { it[HEALTH_CONNECT_ASK_BEFORE_REPLACE] ?: true }
 
     suspend fun setReminderEnabled(enabled: Boolean) {
         context.dataStore.edit { it[REMINDER_ENABLED] = enabled }
@@ -45,5 +50,13 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setLanguage(lang: String) {
         context.dataStore.edit { it[LANGUAGE] = lang }
+    }
+
+    suspend fun setHealthConnectAutoFill(enabled: Boolean) {
+        context.dataStore.edit { it[HEALTH_CONNECT_AUTO_FILL] = enabled }
+    }
+
+    suspend fun setHealthConnectAskBeforeReplace(enabled: Boolean) {
+        context.dataStore.edit { it[HEALTH_CONNECT_ASK_BEFORE_REPLACE] = enabled }
     }
 }

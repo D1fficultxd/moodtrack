@@ -68,19 +68,27 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
     val snackbarHostState = remember { SnackbarHostState() }
-    var isReportExporting by remember { mutableStateOf(false) }
-    var isDoctorExporting by remember { mutableStateOf(false) }
-    var isGuideExporting by remember { mutableStateOf(false) }
+    var isGeneratingRegularPdf by remember { mutableStateOf(false) }
+    var isGeneratingRatingGuide by remember { mutableStateOf(false) }
+    var isGeneratingDoctorReport by remember { mutableStateOf(false) }
     var includeRatingGuide by remember { mutableStateOf(false) }
 
     var startDate by remember { mutableStateOf(LocalDate.now().minusDays(30)) }
     var endDate by remember { mutableStateOf(LocalDate.now()) }
-    val entriesForPeriod = remember(allEntries, startDate, endDate) {
-        allEntries.filter {
-            val d = runCatching { LocalDate.parse(it.date) }.getOrNull()
-            d != null && (d.isEqual(startDate) || d.isAfter(startDate)) && (d.isEqual(endDate) || d.isBefore(endDate))
+    val entriesWithDates = remember(allEntries) {
+        allEntries.mapNotNull { entry ->
+            runCatching { LocalDate.parse(entry.date) }.getOrNull()?.let { date -> date to entry }
         }
     }
+    val entriesForPeriod = remember(entriesWithDates, startDate, endDate) {
+        entriesWithDates
+            .filter { (date, _) ->
+                (date.isEqual(startDate) || date.isAfter(startDate)) &&
+                    (date.isEqual(endDate) || date.isBefore(endDate))
+            }
+            .map { it.second }
+    }
+    val anyExportRunning = isGeneratingRegularPdf || isGeneratingRatingGuide || isGeneratingDoctorReport
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -189,24 +197,28 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
 
                     Button(
                         onClick = {
-                            isReportExporting = true
+                            if (anyExportRunning) return@Button
+                            isGeneratingRegularPdf = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             coroutineScope.launch {
-                                val file = ExportUtils.generatePdf(context, entriesForPeriod, startDate, endDate, includeRatingGuide)
-                                isReportExporting = false
-                                if (file != null) {
-                                    ExportUtils.sharePdf(context, file)
+                                try {
+                                    val file = ExportUtils.generatePdf(context, entriesForPeriod, startDate, endDate, includeRatingGuide)
+                                    if (file != null) {
+                                        ExportUtils.sharePdf(context, file)
+                                    }
+                                } finally {
+                                    isGeneratingRegularPdf = false
                                 }
                             }
                         },
-                        enabled = !isReportExporting && !isDoctorExporting && !isGuideExporting,
+                        enabled = !isGeneratingRegularPdf,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(22.dp),
                         contentPadding = PaddingValues(horizontal = 18.dp)
                     ) {
-                        if (isReportExporting) {
+                        if (isGeneratingRegularPdf) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 color = MaterialTheme.colorScheme.onPrimary,
@@ -221,88 +233,28 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
 
                     FilledTonalButton(
                         onClick = {
-                            val doctorEndDate = LocalDate.now()
-                            val doctorStartDate = doctorEndDate.minusDays(13)
-                            val doctorEntries = allEntries.filter {
-                                val d = runCatching { LocalDate.parse(it.date) }.getOrNull()
-                                d != null && (d.isEqual(doctorStartDate) || d.isAfter(doctorStartDate)) &&
-                                    (d.isEqual(doctorEndDate) || d.isBefore(doctorEndDate))
-                            }
-
-                            if (doctorEntries.isEmpty()) {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                coroutineScope.launch {
-                                    snackbarHostState.showSnackbar(context.getString(R.string.export_doctor_empty))
-                                }
-                                return@FilledTonalButton
-                            }
-                            isDoctorExporting = true
+                            if (anyExportRunning) return@FilledTonalButton
+                            isGeneratingRatingGuide = true
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             coroutineScope.launch {
-                                val file = ExportUtils.generateDoctorPdf(
-                                    context = context,
-                                    entries = doctorEntries,
-                                    start = doctorStartDate,
-                                    end = doctorEndDate
-                                )
-                                isDoctorExporting = false
-                                if (file != null) {
-                                    ExportUtils.sharePdf(context, file)
+                                try {
+                                    val file = ExportUtils.generateRatingGuidePdf(context)
+                                    if (file != null) {
+                                        ExportUtils.sharePdf(context, file)
+                                    }
+                                } finally {
+                                    isGeneratingRatingGuide = false
                                 }
                             }
                         },
-                        enabled = !isReportExporting && !isDoctorExporting && !isGuideExporting,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(64.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        contentPadding = PaddingValues(horizontal = 18.dp)
-                    ) {
-                        if (isDoctorExporting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Icon(Icons.Default.MedicalServices, contentDescription = null)
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                horizontalAlignment = Alignment.Start
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.export_doctor_title),
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = stringResource(R.string.export_doctor_subtitle),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.78f)
-                                )
-                            }
-                        }
-                    }
-
-                    FilledTonalButton(
-                        onClick = {
-                            isGuideExporting = true
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            coroutineScope.launch {
-                                val file = ExportUtils.generateRatingGuidePdf(context)
-                                isGuideExporting = false
-                                if (file != null) {
-                                    ExportUtils.sharePdf(context, file)
-                                }
-                            }
-                        },
-                        enabled = !isReportExporting && !isDoctorExporting && !isGuideExporting,
+                        enabled = !isGeneratingRatingGuide,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(22.dp),
                         contentPadding = PaddingValues(horizontal = 18.dp)
                     ) {
-                        if (isGuideExporting) {
+                        if (isGeneratingRatingGuide) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
                                 strokeWidth = 2.dp
@@ -311,6 +263,82 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
                             Icon(Icons.Default.Description, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(stringResource(R.string.export_rating_guide))
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    ExpressiveSectionHeader(
+                        title = stringResource(R.string.export_doctor_title),
+                        icon = Icons.Default.MedicalServices
+                    )
+
+                    Text(
+                        text = stringResource(R.string.export_doctor_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    FilledTonalButton(
+                        onClick = {
+                            if (anyExportRunning) return@FilledTonalButton
+                            val doctorEndDate = LocalDate.now()
+                            val doctorStartDate = doctorEndDate.minusDays(13)
+                            val doctorEntries = entriesWithDates
+                                .filter { (date, _) ->
+                                    (date.isEqual(doctorStartDate) || date.isAfter(doctorStartDate)) &&
+                                        (date.isEqual(doctorEndDate) || date.isBefore(doctorEndDate))
+                                }
+                                .map { it.second }
+
+                            if (doctorEntries.isEmpty()) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(context.getString(R.string.export_doctor_empty))
+                                }
+                                return@FilledTonalButton
+                            }
+                            isGeneratingDoctorReport = true
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            coroutineScope.launch {
+                                try {
+                                    val file = ExportUtils.generateDoctorPdf(
+                                        context = context,
+                                        entries = doctorEntries,
+                                        start = doctorStartDate,
+                                        end = doctorEndDate
+                                    )
+                                    if (file != null) {
+                                        ExportUtils.sharePdf(context, file)
+                                    }
+                                } finally {
+                                    isGeneratingDoctorReport = false
+                                }
+                            }
+                        },
+                        enabled = !isGeneratingDoctorReport,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(58.dp),
+                        shape = RoundedCornerShape(22.dp),
+                        contentPadding = PaddingValues(horizontal = 18.dp)
+                    ) {
+                        if (isGeneratingDoctorReport) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.MedicalServices, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.export_doctor_title), fontWeight = FontWeight.Bold)
                         }
                     }
                 }

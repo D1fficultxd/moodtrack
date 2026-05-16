@@ -260,7 +260,7 @@ fun DayCell(
                 )
                 if (entry != null && !isFuture) {
                     val hasElevatedRisk = entry.selfHarm || entry.suicidalThoughts > 0
-                    val hasNote = entry.note.isNotBlank()
+                    val hasNote = entry.note.trim().let { it.isNotEmpty() && it != "-" }
 
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         CalendarMarker(MaterialTheme.colorScheme.secondary)

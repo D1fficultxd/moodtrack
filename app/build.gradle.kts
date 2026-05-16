@@ -15,14 +15,14 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.d1ff.moodtrack"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.d1ff.moodtrack"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 3
+        versionName = "2.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -97,6 +97,7 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
     
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.health.connect:connect-client:1.1.0")
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
     
     val workVersion = "2.9.0"

@@ -12,7 +12,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -31,9 +34,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.os.LocaleListCompat
+import androidx.health.connect.client.PermissionController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.d1ff.moodtrack.R
 import com.d1ff.moodtrack.data.SettingsRepository
+import com.d1ff.moodtrack.health.HealthConnectAvailability
+import com.d1ff.moodtrack.health.HealthConnectSleepManager
 import com.d1ff.moodtrack.reminder.ReminderManager
 import com.d1ff.moodtrack.ui.components.ExpressiveSectionHeader
 import com.d1ff.moodtrack.ui.components.GlassCard
@@ -56,8 +62,13 @@ fun SettingsScreen(
     val reminderHour by settingsRepo.reminderHour.collectAsState(initial = 20)
     val reminderMinute by settingsRepo.reminderMinute.collectAsState(initial = 0)
     val language by settingsRepo.language.collectAsState(initial = "SYSTEM")
+    val healthConnectAutoFill by settingsRepo.healthConnectAutoFill.collectAsState(initial = false)
+    val healthConnectAskBeforeReplace by settingsRepo.healthConnectAskBeforeReplace.collectAsState(initial = true)
     val pdfImportState by viewModel.pdfImportState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val healthSleepManager = remember { HealthConnectSleepManager(context) }
+    var healthAvailability by remember { mutableStateOf(healthSleepManager.availability()) }
+    var hasSleepPermission by remember { mutableStateOf(false) }
     
     var showTimePicker by remember { mutableStateOf(false) }
     var showClearConfirm by remember { mutableStateOf(false) }
@@ -71,6 +82,17 @@ fun SettingsScreen(
     val importSkippedText = stringResource(R.string.import_result_skipped)
     val importFailedText = stringResource(R.string.import_file_failed)
     val importFormatNotRecognizedText = stringResource(R.string.import_format_not_recognized)
+    val healthConnectedText = stringResource(R.string.health_connect_connected)
+    val healthNoPermissionText = stringResource(R.string.health_connect_no_sleep_permission)
+    val healthUnavailableText = stringResource(R.string.health_connect_unavailable)
+
+    LaunchedEffect(healthAvailability) {
+        if (healthAvailability == HealthConnectAvailability.Available) {
+            hasSleepPermission = healthSleepManager.hasSleepPermission()
+        } else {
+            hasSleepPermission = false
+        }
+    }
 
     LaunchedEffect(pdfImportState) {
         when (val state = pdfImportState) {
@@ -118,6 +140,15 @@ fun SettingsScreen(
             }
             pendingImportUri = uri
             showImportConfirm = true
+        }
+    }
+
+    val healthPermissionLauncher = rememberLauncherForActivityResult(
+        PermissionController.createRequestPermissionResultContract()
+    ) { grantedPermissions ->
+        hasSleepPermission = grantedPermissions.contains(healthSleepManager.sleepPermission)
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(if (hasSleepPermission) healthConnectedText else healthNoPermissionText)
         }
     }
 
@@ -242,6 +273,133 @@ fun SettingsScreen(
                             }
                         }
                     }
+                }
+            }
+
+            item {
+                SettingsSectionCard(
+                    title = stringResource(R.string.health_connect_title),
+                    icon = Icons.Default.Favorite
+                ) {
+                    Text(
+                        text = stringResource(R.string.health_connect_subtitle),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    when (healthAvailability) {
+                        HealthConnectAvailability.Available -> {
+                            SettingsInnerBox(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    healthPermissionLauncher.launch(healthSleepManager.permissions)
+                                }
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(
+                                            text = stringResource(R.string.health_connect_connect),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            text = if (hasSleepPermission) {
+                                                stringResource(R.string.health_connect_connected)
+                                            } else {
+                                                stringResource(R.string.health_connect_no_sleep_permission)
+                                            },
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    leadingContent = {
+                                        Icon(
+                                            Icons.Default.Bedtime,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            SettingsSwitchRow(
+                                title = stringResource(R.string.health_connect_auto_fill),
+                                checked = healthConnectAutoFill,
+                                onCheckedChange = { enabled ->
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    coroutineScope.launch { settingsRepo.setHealthConnectAutoFill(enabled) }
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            SettingsSwitchRow(
+                                title = stringResource(R.string.health_connect_ask_before_replace),
+                                checked = healthConnectAskBeforeReplace,
+                                enabled = healthConnectAutoFill,
+                                onCheckedChange = { enabled ->
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    coroutineScope.launch { settingsRepo.setHealthConnectAskBeforeReplace(enabled) }
+                                }
+                            )
+                        }
+
+                        HealthConnectAvailability.InstallOrUpdateRequired -> {
+                            SettingsInnerBox(
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    runCatching { context.startActivity(healthSleepManager.installIntent()) }
+                                        .onFailure {
+                                            coroutineScope.launch { snackbarHostState.showSnackbar(healthUnavailableText) }
+                                        }
+                                }
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(
+                                            text = stringResource(R.string.health_connect_install),
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Text(
+                                            text = stringResource(R.string.health_connect_unavailable),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    leadingContent = {
+                                        Icon(
+                                            Icons.Default.Download,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    },
+                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                                )
+                            }
+                        }
+
+                        HealthConnectAvailability.Unavailable -> {
+                            Text(
+                                text = stringResource(R.string.health_connect_unavailable),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = stringResource(R.string.health_connect_privacy_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 12.dp)
+                    )
                 }
             }
 
@@ -396,6 +554,8 @@ fun SettingsScreen(
     }
 
     if (showTimePicker) {
+        val configuration = LocalConfiguration.current
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val timePickerState = rememberTimePickerState(
             initialHour = reminderHour,
             initialMinute = reminderMinute,
@@ -403,6 +563,10 @@ fun SettingsScreen(
         )
         var lastHapticHour by remember { mutableIntStateOf(timePickerState.hour) }
         var lastHapticMinute by remember { mutableIntStateOf(timePickerState.minute) }
+
+        LaunchedEffect(Unit) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
 
         LaunchedEffect(timePickerState.hour) {
             if (lastHapticHour != timePickerState.hour) {
@@ -418,40 +582,63 @@ fun SettingsScreen(
             }
         }
         
-        AlertDialog(
+        ModalBottomSheet(
             onDismissRequest = { showTimePicker = false },
-            shape = RoundedCornerShape(30.dp),
+            sheetState = sheetState,
+            shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
             containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-            titleContentColor = MaterialTheme.colorScheme.onSurface,
-            textContentColor = MaterialTheme.colorScheme.onSurface,
-            title = {
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = 0.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = configuration.screenHeightDp.dp * 0.86f)
+                    .navigationBarsPadding()
+                    .imePadding()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .padding(bottom = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.reminder_time),
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.align(Alignment.Start)
                 )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    coroutineScope.launch {
-                        settingsRepo.setReminderTime(timePickerState.hour, timePickerState.minute)
-                        if (reminderEnabled) {
-                            ReminderManager.scheduleReminder(context, timePickerState.hour, timePickerState.minute)
-                        }
+
+                TimePicker(state = timePickerState)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TextButton(onClick = { showTimePicker = false }) {
+                        Text(stringResource(R.string.cancel))
                     }
-                    showTimePicker = false
-                }) { Text(stringResource(R.string.ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showTimePicker = false }) { Text(stringResource(R.string.cancel)) }
-            },
-            text = {
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    TimePicker(state = timePickerState)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            coroutineScope.launch {
+                                settingsRepo.setReminderTime(timePickerState.hour, timePickerState.minute)
+                                if (reminderEnabled) {
+                                    ReminderManager.scheduleReminder(context, timePickerState.hour, timePickerState.minute)
+                                }
+                            }
+                            showTimePicker = false
+                        },
+                        shape = RoundedCornerShape(18.dp)
+                    ) {
+                        Text(stringResource(R.string.ok))
+                    }
                 }
             }
-        )
+        }
     }
 
     if (showLanguageSheet) {
@@ -594,6 +781,44 @@ fun SettingsInnerBox(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f))
     ) {
         content()
+    }
+}
+
+@Composable
+private fun SettingsSwitchRow(
+    title: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Surface(
+        onClick = { onCheckedChange(!checked) },
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.54f)
+            )
+            Switch(
+                checked = checked,
+                enabled = enabled,
+                onCheckedChange = onCheckedChange
+            )
+        }
     }
 }
 
