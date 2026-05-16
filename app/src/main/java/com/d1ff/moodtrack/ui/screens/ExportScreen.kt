@@ -211,7 +211,7 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
                                 }
                             }
                         },
-                        enabled = !isGeneratingRegularPdf,
+                        enabled = !anyExportRunning,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -247,7 +247,7 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
                                 }
                             }
                         },
-                        enabled = !isGeneratingRatingGuide,
+                        enabled = !anyExportRunning,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
@@ -323,7 +323,7 @@ fun ExportScreen(viewModel: MoodViewModel = viewModel()) {
                                 }
                             }
                         },
-                        enabled = !isGeneratingDoctorReport,
+                        enabled = !anyExportRunning,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(58.dp),

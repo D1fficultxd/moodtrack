@@ -158,11 +158,34 @@ fun MonthSelector(currentMonth: YearMonth, onMonthChange: (YearMonth) -> Unit) {
 
 @Composable
 fun CalendarGrid(month: YearMonth, entries: List<DailyEntry>, onDateClick: (LocalDate) -> Unit) {
-    val daysInMonth = remember(month) { month.lengthOfMonth() }
-    val daysBefore = remember(month) { month.atDay(1).dayOfWeek.value - 1 }
-    val rows = remember(daysInMonth, daysBefore) { (daysInMonth + daysBefore + 6) / 7 }
     val today = remember { LocalDate.now() }
     val entriesByDate = remember(entries) { entries.associateBy { it.date } }
+    val hasNoteByDate = remember(entries) {
+        entries.associate { entry ->
+            entry.date to entry.note.trim().let { it.isNotEmpty() && it != "-" }
+        }
+    }
+    val riskByDate = remember(entries) {
+        entries.associate { entry ->
+            entry.date to (entry.selfHarm || entry.suicidalThoughts > 0)
+        }
+    }
+    val monthCells = remember(month) {
+        val daysInMonth = month.lengthOfMonth()
+        val daysBefore = month.atDay(1).dayOfWeek.value - 1
+        val rows = (daysInMonth + daysBefore + 6) / 7
+
+        List(rows * 7) { cellIndex ->
+            val day = cellIndex - daysBefore + 1
+            if (day in 1..daysInMonth) {
+                val date = month.atDay(day)
+                CalendarDateCell(date = date, key = date.toString())
+            } else {
+                null
+            }
+        }
+    }
+    val monthWeeks = remember(monthCells) { monthCells.chunked(7) }
     
     val locale = Locale.getDefault()
     val weekDays = remember(locale.language) {
@@ -188,20 +211,25 @@ fun CalendarGrid(month: YearMonth, entries: List<DailyEntry>, onDateClick: (Loca
         
         Spacer(modifier = Modifier.height(8.dp))
         
-        for (row in 0 until rows) {
+        monthWeeks.forEach { week ->
             Row(modifier = Modifier.fillMaxWidth()) {
-                for (col in 0 until 7) {
-                    val cellIndex = row * 7 + col
-                    val day = cellIndex - daysBefore + 1
-                    
+                week.forEach { cell ->
                     Box(modifier = Modifier.weight(1f).aspectRatio(1f), contentAlignment = Alignment.Center) {
-                        if (day in 1..daysInMonth) {
-                            val date = month.atDay(day)
-                            val entry = entriesByDate[date.toString()]
+                        if (cell != null) {
+                            val date = cell.date
+                            val entry = entriesByDate[cell.key]
                             val isToday = date == today
                             val isFuture = date.isAfter(today)
                             
-                            DayCell(date, entry, isToday, isFuture, onDateClick)
+                            DayCell(
+                                date = date,
+                                hasEntry = entry != null,
+                                hasNote = hasNoteByDate[cell.key] == true,
+                                hasElevatedRisk = riskByDate[cell.key] == true,
+                                isToday = isToday,
+                                isFuture = isFuture,
+                                onClick = onDateClick
+                            )
                         }
                     }
                 }
@@ -210,10 +238,17 @@ fun CalendarGrid(month: YearMonth, entries: List<DailyEntry>, onDateClick: (Loca
     }
 }
 
+private data class CalendarDateCell(
+    val date: LocalDate,
+    val key: String
+)
+
 @Composable
 fun DayCell(
     date: LocalDate,
-    entry: DailyEntry?,
+    hasEntry: Boolean,
+    hasNote: Boolean,
+    hasElevatedRisk: Boolean,
     isToday: Boolean,
     isFuture: Boolean,
     onClick: (LocalDate) -> Unit
@@ -221,14 +256,14 @@ fun DayCell(
     val backgroundColor = when {
         isFuture -> Color.Transparent
         isToday -> MaterialTheme.colorScheme.primaryContainer
-        entry != null -> MaterialTheme.colorScheme.secondaryContainer
+        hasEntry -> MaterialTheme.colorScheme.secondaryContainer
         else -> Color.Transparent
     }
     
     val contentColor = when {
         isFuture -> MaterialTheme.colorScheme.onSurfaceVariant
         isToday -> MaterialTheme.colorScheme.onPrimaryContainer
-        entry != null -> MaterialTheme.colorScheme.onSecondaryContainer
+        hasEntry -> MaterialTheme.colorScheme.onSecondaryContainer
         else -> MaterialTheme.colorScheme.onSurface
     }
 
@@ -255,13 +290,10 @@ fun DayCell(
                 Text(
                     text = date.dayOfMonth.toString(),
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (isToday || entry != null) FontWeight.Bold else FontWeight.Normal,
+                    fontWeight = if (isToday || hasEntry) FontWeight.Bold else FontWeight.Normal,
                     color = contentColor
                 )
-                if (entry != null && !isFuture) {
-                    val hasElevatedRisk = entry.selfHarm || entry.suicidalThoughts > 0
-                    val hasNote = entry.note.trim().let { it.isNotEmpty() && it != "-" }
-
+                if (hasEntry && !isFuture) {
                     Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         CalendarMarker(MaterialTheme.colorScheme.secondary)
                         if (hasNote) {

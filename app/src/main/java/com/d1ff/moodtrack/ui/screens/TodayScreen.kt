@@ -105,7 +105,9 @@ fun TodayScreen(
     val parsedDate = remember(dateToLoad) { LocalDate.parse(dateToLoad) }
     val titleFormatter = remember { DateTimeFormatter.ofPattern("d MMMM yyyy") }
 
-    val isHighRisk = suicidalThoughts == 3 || selfHarm
+    val isHighRisk by remember {
+        derivedStateOf { suicidalThoughts == 3 || selfHarm }
+    }
 
     // Debounced Autosave Logic
     LaunchedEffect(
@@ -169,7 +171,7 @@ fun TodayScreen(
         dateToLoad,
         healthAutoFill,
         healthAskBeforeReplace,
-        entryForDate?.id,
+        entryForDate?.date,
         healthRefreshTick
     ) {
         pendingHealthSleep = null
@@ -189,8 +191,11 @@ fun TodayScreen(
                         sleepHours = result.hours
                         snackbarHostState.showSnackbar(context.getString(R.string.health_connect_sleep_filled))
                     }
-                } else if (existingSleep != null && abs(existingSleep - result.hours) >= 0.25f) {
-                    pendingHealthSleep = result
+                } else {
+                    val manualSleep = existingSleep ?: sleepHours
+                    if (abs(manualSleep - result.hours) >= 0.25f) {
+                        pendingHealthSleep = result
+                    }
                 }
             }
 
@@ -929,50 +934,82 @@ private fun HealthSleepSuggestionCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 2.dp, bottom = 8.dp),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.24f))
+            .padding(top = 4.dp, bottom = 8.dp),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.26f)),
+        tonalElevation = 0.dp
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(20.dp))
-                Text(
-                    text = message,
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    tonalElevation = 0.dp
+                ) {
+                    Box(
+                        modifier = Modifier.size(36.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Bedtime,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+                Column(
                     modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-            }
-            Text(
-                text = savedAs,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.82f)
-            )
-            if (caption != null) {
-                Text(
-                    text = caption,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.72f)
-                )
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = savedAs,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (caption != null) {
+                        Text(
+                            text = caption,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = onKeepManual) {
+                TextButton(
+                    onClick = onKeepManual,
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                ) {
                     Text(stringResource(R.string.health_connect_sleep_keep_manual))
                 }
                 FilledTonalButton(
                     onClick = onUse,
-                    shape = RoundedCornerShape(16.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    ),
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 10.dp)
                 ) {
                     Text(stringResource(R.string.health_connect_sleep_use))
                 }

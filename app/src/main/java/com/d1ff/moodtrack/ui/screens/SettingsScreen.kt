@@ -247,7 +247,6 @@ fun SettingsScreen(
                     AnimatedVisibility(visible = reminderEnabled) {
                         SettingsInnerBox(
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 showTimePicker = true
                             }
                         ) {
